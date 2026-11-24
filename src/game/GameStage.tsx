@@ -27,7 +27,7 @@ export function GameStage({ game }: { game: GameState }) {
 
   return (
     <div className={`relative h-full w-full overflow-hidden ${game.boosting ? 'stage-boost' : ''}`}>
-      <Scene />
+      <Scene bg={game.bg} />
 
       {/* Biển hiệu */}
       <div

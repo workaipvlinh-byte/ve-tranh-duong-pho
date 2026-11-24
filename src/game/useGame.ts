@@ -10,6 +10,7 @@ import { EN_LINES, GAME, TEXT, type Lang } from './config';
 import type { Job } from './Easel';
 import { STYLES, loadSource } from './portrait';
 import { PAINTERS } from './Painter';
+import { BACKGROUNDS } from './Scene';
 
 const pick = makePicker();
 voice.defaultWho = GAME.voice; // server gửi lại giọng đã chọn (setVoice) ngay khi trang nối vào
@@ -59,6 +60,8 @@ export function useGame() {
   jobRef.current = job;
   const lastStyle = useRef(-1);
   const [lang, setLang] = useState<Lang>('vi');
+  const [painterIdx, setPainterIdx] = useState(0);
+  const [bg, setBg] = useState(0);
   const langRef = useRef(lang);
   langRef.current = lang;
   // Bộ câu MC + tên đọc được theo bản đang chọn
@@ -187,11 +190,16 @@ export function useGame() {
       // Bản tiếng Việt / tiếng Anh: server nhớ trong cài đặt riêng (setPrefs), gửi lại cho trang mới mở
       if (c.action === 'setPrefs' && c.text) {
         try {
-          const l = JSON.parse(c.text).lang;
-          if (l === 'vi' || l === 'en') {
-            setLang(l);
-            voice.lang = l;
+          const p = JSON.parse(c.text);
+          if (p.lang === 'vi' || p.lang === 'en') {
+            setLang(p.lang);
+            voice.lang = p.lang;
           }
+          // Họa sĩ và nền chủ kênh chọn trước (không đổi ngẫu nhiên)
+          const pi = Number(p.painter);
+          if (Number.isInteger(pi) && pi >= 0 && pi < PAINTERS.length) setPainterIdx(pi);
+          const bi = Number(p.bg);
+          if (Number.isInteger(bi) && bi >= 0 && bi < BACKGROUNDS.length) setBg(bi);
         } catch {
           // sai JSON: bỏ qua
         }
@@ -269,8 +277,7 @@ export function useGame() {
     const n = doneCount + 1;
     setDoneCount(n);
     setJob(null);
-    if (n % GAME.paintersEvery === 0) voice.say(S().painterLine(PAINTERS[(n / GAME.paintersEvery) % PAINTERS.length].name));
-    else if (voice.waiting === 0) {
+    if (voice.waiting === 0) {
       const line = pick<(name: string) => string>(S().finishLines);
       if (line) voice.say(line(sn(j.name)));
     }
@@ -300,7 +307,9 @@ export function useGame() {
     queue,
     job,
     gallery,
-    painter: PAINTERS[Math.floor(doneCount / GAME.paintersEvery) % PAINTERS.length],
+    painter: PAINTERS[painterIdx],
+    painterIdx,
+    bg,
     finish,
     feed,
     lastGift,

@@ -57,7 +57,6 @@ export const EN_LINES = {
     (name: string) => `All done, ${name}. Up on the line it goes!`,
     (name: string) => `${name}, your portrait is ready. Next in line, get ready!`,
   ],
-  painterLine: (painter: string) => `Shift change! ${painter} takes over the brush.`,
 };
 
 export const GAME = {
@@ -71,7 +70,6 @@ export const GAME = {
   voice: 'M' as 'M' | 'F',
 
   maxQueue: 300, // hàng chờ tối đa (khu chờ chỉ hiện 32 người đầu, còn lại hiện "+N")
-  paintersEvery: 5, // vẽ xong 5 bức thì đổi họa sĩ
   galleryMax: 6, // số tranh treo trên dây
 
   // ---------- Câu đọc riêng của xưởng vẽ ----------
@@ -83,8 +81,6 @@ export const GAME = {
     (name: string) => `Bạn ${name} ơi, chân dung của bạn đây.`,
     (name: string) => `Xong bức của bạn ${name}. Người kế tiếp chuẩn bị nha.`,
   ],
-  // Họa sĩ mới vào ca
-  painterLine: (painter: string) => `Đổi ca rồi, họa sĩ ${painter} vào vẽ tiếp nè.`,
 
   // Điểm
   pointsPerComment: 1,
