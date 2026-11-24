@@ -199,6 +199,8 @@ export function useGame() {
         try {
           const p = JSON.parse(c.text);
           if (p.lang === 'vi' || p.lang === 'en') {
+            // đổi bản thì bỏ hết câu đang chờ đọc của bản cũ, tránh đọc lẫn 2 thứ tiếng
+            if (voice.lang !== p.lang && IS_STAGE) voice.stop();
             setLang(p.lang);
             voice.lang = p.lang;
           }

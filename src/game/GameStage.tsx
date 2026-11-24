@@ -97,7 +97,7 @@ export function GameStage({ game }: { game: GameState }) {
           exit={{ x: -620 }}
           transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
         >
-          <Painter p={game.painter} brush={brush} lines={T.show} label={T.painter} />
+          <Painter p={game.painter} brush={brush} lines={T.show} label={`${T.painter} ${game.lang === 'en' ? game.painter.en : game.painter.name}`} />
         </motion.div>
       </AnimatePresence>
 
@@ -196,11 +196,20 @@ function Queue({ queue, T }: { queue: Waiting[]; T: (typeof TEXT)['vi'] }) {
               exit={{ x: 380, y: QUEUE.y + 120, scale: 0.4, opacity: 0, transition: { duration: 0.45, ease: 'easeIn' } }}
               transition={{ type: 'spring', stiffness: 260, damping: 24 }}
             >
-              <Person w={w} first={i === 0} next={T.next} />
+              <Person w={w} />
             </motion.div>
           );
         })}
       </AnimatePresence>
+      {/* 1 nhãn "Kế tiếp" cố định ở chỗ đứng đầu hàng */}
+      {shown.length > 0 && (
+        <div
+          className="absolute -translate-x-1/2 whitespace-nowrap rounded bg-[#c0392b] px-2 text-[20px] font-bold text-white"
+          style={{ left: slotPos(0).x + 32, top: slotPos(0).y - 36 }}
+        >
+          {T.next}
+        </div>
+      )}
       {more > 0 && (
         <div className="absolute rounded-full bg-[#2a1d17]/85 px-4 py-1 text-[28px] font-bold text-white" style={{ left: QUEUE.x + 40, top: QUEUE.y + QUEUE.rows * QUEUE.gap + 4 }}>
           {T.more(more)}
@@ -211,7 +220,7 @@ function Queue({ queue, T }: { queue: Waiting[]; T: (typeof TEXT)['vi'] }) {
 }
 
 const DOT = ['#e76f51', '#2a9d8f', '#e9c46a', '#8ab17d', '#9b5de5', '#f15bb5', '#00bbf9'];
-function Person({ w, first, next }: { w: Waiting; first: boolean; next: string }) {
+function Person({ w }: { w: Waiting }) {
   const color = DOT[[...w.username].reduce((s, c) => s + c.charCodeAt(0), 0) % DOT.length];
   return (
     <div className="relative h-[64px] w-[64px] bob" style={{ animationDelay: `${-(w.username.length % 7) * 0.3}s` }}>
@@ -226,7 +235,6 @@ function Person({ w, first, next }: { w: Waiting; first: boolean; next: string }
         )}
       </div>
       {w.vip && <div className="absolute -right-2 -top-3 text-[28px]">⭐</div>}
-      {first && <div className="absolute -top-9 left-1/2 -translate-x-1/2 whitespace-nowrap rounded bg-[#c0392b] px-2 text-[20px] font-bold text-white">{next}</div>}
     </div>
   );
 }

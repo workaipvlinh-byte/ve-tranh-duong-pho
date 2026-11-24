@@ -120,7 +120,7 @@ export default function App() {
                     transformOrigin: "top left",
                   }}
                 >
-                  <Painter p={p} brush={idle} lines={[]} label="" />
+                  <Painter p={p} brush={idle} lines={[]} label={p.name} />
                 </div>
               </div>
               <div className="truncate bg-slate-800 px-1 text-[11px]">

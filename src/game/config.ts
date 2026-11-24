@@ -44,7 +44,7 @@ export const TEXT = {
 // Câu MC ở bản tiếng Anh (bản Việt dùng các câu trong GAME bên dưới). Tên kênh không đọc ở bản này.
 export const EN_LINES = {
   greeting: (names: string, _kenh: string, more = 0) => (more > 0 ? `Welcome ${names} and ${more} more friends!` : `Welcome ${names}!`),
-  thankGift: (name: string, gift: string, _kenh: string) => `Thank you ${name} for the ${gift}!`,
+  thankGift: (name: string, _gift: string, _kenh: string) => `Thank you so much for the gift, ${name}!`,
   giftWishes: ['Have a wonderful day!', 'Wishing you a lucky week!', 'Hope everything goes your way!'],
   thankFollow: (name: string, _kenh: string) => `Thanks for the follow, ${name}!`,
   shareWithNames: (names: string, _kenh: string) => `Thanks for hanging out, ${names}. Share the live so your friends can get drawn too!`,
@@ -118,7 +118,8 @@ export const GAME = {
   // Cùng 1 người tặng liên tục / combo: chỉ cảm ơn 1 lần mỗi 30 giây. Quà từ 99 xu luôn được cảm ơn.
   giftThanksCooldownMs: 30_000,
   bigGiftCoins: 99,
-  thankGift: (name: string, gift: string, kenh: string) => `${kenh} cảm ơn bạn ${name} đã tặng ${gift}.`,
+  // không đọc tên quà: TikTok gửi tên quà theo ngôn ngữ tài khoản, đọc lên dễ lẫn tiếng Anh
+  thankGift: (name: string, _gift: string, kenh: string) => `${kenh} cảm ơn bạn ${name} đã tặng quà nha.`,
   // Đọc thêm 1 câu chúc ngẫu nhiên sau lời cảm ơn quà ([] = không đọc)
   giftWishes: [
     'Chúc bạn một ngày thật vui.',

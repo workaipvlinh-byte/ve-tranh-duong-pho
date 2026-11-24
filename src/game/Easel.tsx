@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 import {
   ART,
+  paint,
   STYLES,
   colorPath,
   loadSource,
@@ -69,7 +70,7 @@ export function Easel({
       const style = STYLES[job.style];
       const rnd = seeded(job.username + job.id);
       const lines = traceLines(src, rnd);
-      const art = style.build(src, rnd);
+      const art = paint(style, src, rnd);
       const path = colorPath(rnd);
       const total = lines.reduce((s, l) => s + l.length / 2, 0);
       const segLen: number[] = [0];

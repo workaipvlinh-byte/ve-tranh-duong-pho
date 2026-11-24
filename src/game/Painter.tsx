@@ -6,6 +6,7 @@ type HairStyle = 'short' | 'bob' | 'bun' | 'long' | 'curly' | 'pony' | 'spiky' |
 type Hat = 'beret' | 'nonla' | 'cap' | 'khanxep' | 'straw' | 'bandana' | 'beanie';
 export interface PainterDef {
   name: string;
+  en: string; // tên ở bản tiếng Anh
   skin: string;
   hair: string;
   hairStyle: HairStyle;
@@ -22,16 +23,16 @@ export interface PainterDef {
 }
 
 export const PAINTERS: PainterDef[] = [
-  { name: 'Chú Tư', skin: '#d9a27c', hair: '#2b1d16', hairStyle: 'short', hat: 'nonla', hatColor: '#ecd28f', shirt: '#8b5a2b', pants: '#2d2a26', mustache: true },
-  { name: 'Cô Mây', skin: '#f6d2b8', hair: '#2b1d16', hairStyle: 'long', hat: 'beret', hatColor: '#2f9e6e', shirt: '#fdfdfd', pants: '#2a6f97', skirt: true, apron: '#9ad1b6', blush: true },
-  { name: 'Bé Bin', skin: '#eec19f', hair: '#4a2f22', hairStyle: 'spiky', hat: 'cap', hatColor: '#f77f00', shirt: '#3a86ff', pants: '#22333b' },
-  { name: 'Bà Sáu', skin: '#eec19f', hair: '#d9d9d9', hairStyle: 'bun', shirt: '#7b4fa0', pants: '#3d2c4e', skirt: true, apron: '#ead7f7', glasses: true },
-  { name: 'Anh Khoa', skin: '#b97d57', hair: '#1c1c2e', hairStyle: 'curly', hat: 'bandana', hatColor: '#d62828', shirt: '#2b2d42', pants: '#6c584c', beard: 'short' },
-  { name: 'Chị Hồng', skin: '#f6d2b8', hair: '#9b3b5a', hairStyle: 'pony', shirt: '#ffafcc', pants: '#ff5d8f', skirt: true, blush: true },
-  { name: 'Ông Đồ', skin: '#eec19f', hair: '#eeeeee', hairStyle: 'bald', hat: 'khanxep', hatColor: '#14385c', shirt: '#1d4e89', pants: '#efefef', beard: 'long', mustache: true },
-  { name: 'Cậu Tí', skin: '#f6d2b8', hair: '#c58b3a', hairStyle: 'short', hat: 'beanie', hatColor: '#4361ee', shirt: '#ffd60a', pants: '#264653', glasses: true },
-  { name: 'Cô Thủy', skin: '#d9a27c', hair: '#7a4a2a', hairStyle: 'curly', hat: 'straw', hatColor: '#e9c46a', shirt: '#e63946', pants: '#264653', skirt: true, blush: true },
-  { name: 'Anh Bảo', skin: '#eec19f', hair: '#2b1d16', hairStyle: 'bob', hat: 'beret', hatColor: '#3d405b', shirt: '#606c38', pants: '#283618', apron: '#f4a261', mustache: true },
+  { name: 'Chú Tư', en: 'Uncle Tu', skin: '#d9a27c', hair: '#2b1d16', hairStyle: 'short', hat: 'nonla', hatColor: '#ecd28f', shirt: '#8b5a2b', pants: '#2d2a26', mustache: true },
+  { name: 'Cô Mây', en: 'Miss May', skin: '#f6d2b8', hair: '#2b1d16', hairStyle: 'long', hat: 'beret', hatColor: '#2f9e6e', shirt: '#fdfdfd', pants: '#2a6f97', skirt: true, apron: '#9ad1b6', blush: true },
+  { name: 'Bé Bin', en: 'Little Ben', skin: '#eec19f', hair: '#4a2f22', hairStyle: 'spiky', hat: 'cap', hatColor: '#f77f00', shirt: '#3a86ff', pants: '#22333b' },
+  { name: 'Bà Sáu', en: 'Granny Sue', skin: '#eec19f', hair: '#d9d9d9', hairStyle: 'bun', shirt: '#7b4fa0', pants: '#3d2c4e', skirt: true, apron: '#ead7f7', glasses: true },
+  { name: 'Anh Khoa', en: 'Kai', skin: '#b97d57', hair: '#1c1c2e', hairStyle: 'curly', hat: 'bandana', hatColor: '#d62828', shirt: '#2b2d42', pants: '#6c584c', beard: 'short' },
+  { name: 'Chị Hồng', en: 'Rosie', skin: '#f6d2b8', hair: '#9b3b5a', hairStyle: 'pony', shirt: '#ffafcc', pants: '#ff5d8f', skirt: true, blush: true },
+  { name: 'Ông Đồ', en: 'Master Do', skin: '#eec19f', hair: '#eeeeee', hairStyle: 'bald', hat: 'khanxep', hatColor: '#14385c', shirt: '#1d4e89', pants: '#efefef', beard: 'long', mustache: true },
+  { name: 'Cậu Tí', en: 'Timmy', skin: '#f6d2b8', hair: '#c58b3a', hairStyle: 'short', hat: 'beanie', hatColor: '#4361ee', shirt: '#ffd60a', pants: '#264653', glasses: true },
+  { name: 'Cô Thủy', en: 'Miss Willow', skin: '#d9a27c', hair: '#7a4a2a', hairStyle: 'curly', hat: 'straw', hatColor: '#e9c46a', shirt: '#e63946', pants: '#264653', skirt: true, blush: true },
+  { name: 'Anh Bảo', en: 'Leo', skin: '#eec19f', hair: '#2b1d16', hairStyle: 'bob', hat: 'beret', hatColor: '#3d405b', shirt: '#606c38', pants: '#283618', apron: '#f4a261', mustache: true },
 ];
 
 
@@ -365,7 +366,7 @@ export function Painter({ p, brush, lines, label }: { p: PainterDef; brush: Brus
         style={{ opacity: 0, transform: 'scale(0.6)', transformOrigin: 'bottom left', transition: 'opacity 180ms ease-out, transform 260ms cubic-bezier(.34,1.56,.64,1)' }}
       />
       <div className="absolute left-[60px] top-[690px] rounded-full bg-[#2a1d17]/80 px-5 py-1 text-[28px] font-semibold text-amber-100">
-        {label} {p.name}
+        {label}
       </div>
     </div>
   );

@@ -15,6 +15,7 @@ export interface Style {
   lineW: number;
   linesOnTop: boolean; // nét còn hiện trên lớp màu hay bị màu phủ
   paper: string;
+  keep: number; // 0..1: phủ lại ảnh gốc lên cuối để giữ đúng màu avatar
   build: (src: HTMLCanvasElement, rnd: () => number) => HTMLCanvasElement;
 }
 
@@ -93,6 +94,7 @@ function upscale(img: ImageData, smooth = true) {
 export const STYLES: Style[] = [
   {
     key: 'mosaic',
+    keep: 0.35,
     name: 'Khảm gốm',
     en: 'Mosaic',
     ink: '#4a3426',
@@ -100,15 +102,15 @@ export const STYLES: Style[] = [
     linesOnTop: false,
     paper: '#efe4d0',
     build(src, rnd) {
-      const T = 42;
+      const T = 56;
       const s = ART / T;
       const at = sampler(src);
       const c = mk(ART);
       const g = paper(c, '#e9dcc4', rnd, 0);
       for (let y = 0; y < T; y++)
         for (let x = 0; x < T; x++) {
-          const [r, gg, b] = saturate(at((x + 0.5) / T, (y + 0.5) / T), 1.25);
-          const j = (rnd() - 0.5) * 26;
+          const [r, gg, b] = saturate(at((x + 0.5) / T, (y + 0.5) / T), 1.05);
+          const j = (rnd() - 0.5) * 8;
           g.fillStyle = rgb(r + j, gg + j, b + j);
           const inset = 0.7 + rnd() * 0.5;
           g.beginPath();
@@ -122,6 +124,7 @@ export const STYLES: Style[] = [
   },
   {
     key: 'pixel',
+    keep: 0.2,
     name: 'Điểm ảnh',
     en: 'Pixel art',
     ink: '#222',
@@ -129,20 +132,12 @@ export const STYLES: Style[] = [
     linesOnTop: false,
     paper: '#f4f1ea',
     build(src) {
-      const img = pixels(src, 44);
-      const d = img.data;
-      const q = (v: number) => Math.round(v / 51) * 51;
-      for (let i = 0; i < d.length; i += 4) {
-        const [r, g, b] = saturate([d[i], d[i + 1], d[i + 2]], 1.3);
-        d[i] = q(r);
-        d[i + 1] = q(g);
-        d[i + 2] = q(b);
-      }
-      return upscale(img, false);
+      return upscale(pixels(src, 64), false);
     },
   },
   {
     key: 'watercolor',
+    keep: 0.5,
     name: 'Màu nước',
     en: 'Watercolor',
     ink: '#5b4b3f',
@@ -153,14 +148,14 @@ export const STYLES: Style[] = [
       const c = mk(ART);
       const g = paper(c, '#fbf6ec', rnd);
       g.globalAlpha = 0.85;
-      g.filter = 'blur(3px) saturate(1.4) brightness(1.06)';
+      g.filter = 'blur(2px) saturate(1.1)';
       g.drawImage(src, 10, 10, ART - 20, ART - 20);
       g.filter = 'none';
       const at = sampler(src);
       for (let i = 0; i < 260; i++) {
         const u = rnd();
         const v = rnd();
-        const [r, gg, b] = saturate(at(u, v), 1.5);
+        const [r, gg, b] = saturate(at(u, v), 1.1);
         g.globalAlpha = 0.1 + rnd() * 0.1;
         g.fillStyle = rgb(r, gg, b);
         g.beginPath();
@@ -168,7 +163,7 @@ export const STYLES: Style[] = [
         g.fill();
       }
       g.globalAlpha = 0.45;
-      g.filter = 'saturate(1.3) contrast(1.05)';
+      g.filter = 'none';
       g.drawImage(src, 10, 10, ART - 20, ART - 20);
       g.filter = 'none';
       g.globalAlpha = 1;
@@ -177,34 +172,29 @@ export const STYLES: Style[] = [
   },
   {
     key: 'pop',
-    name: 'Pop art',
+    keep: 0.35,
+    name: 'Tranh pop',
     en: 'Pop art',
     ink: '#111',
     lineW: 4,
     linesOnTop: true,
     paper: '#fff',
-    build(src, rnd) {
-      const palettes = [
-        ['#1b1f5e', '#e6287a', '#ffd23f', '#fff6e0'],
-        ['#14213d', '#fb5607', '#3ec1d3', '#fdfcdc'],
-        ['#2b193d', '#2ec4b6', '#ff9f1c', '#ffffff'],
-      ];
-      const pal = palettes[Math.floor(rnd() * palettes.length)].map((h) => [
-        parseInt(h.slice(1, 3), 16),
-        parseInt(h.slice(3, 5), 16),
-        parseInt(h.slice(5, 7), 16),
-      ]);
+    build(src) {
       const img = pixels(src, 280);
       const d = img.data;
+      const q = (v: number) => Math.min(255, Math.round(v / 64) * 64);
       for (let i = 0; i < d.length; i += 4) {
-        const k = Math.min(3, Math.floor((lum(d, i) / 256) * 4));
-        [d[i], d[i + 1], d[i + 2]] = pal[k];
+        const [r, g, b] = saturate([d[i], d[i + 1], d[i + 2]], 1.3);
+        d[i] = q(r);
+        d[i + 1] = q(g);
+        d[i + 2] = q(b);
       }
       return upscale(img);
     },
   },
   {
     key: 'sketch',
+    keep: 0.45,
     name: 'Chì màu',
     en: 'Colored pencil',
     ink: '#2b2b2b',
@@ -216,7 +206,7 @@ export const STYLES: Style[] = [
       const g = paper(c, '#f6f3ee', rnd, 1400);
       g.globalAlpha = 0.75;
       g.globalCompositeOperation = 'multiply';
-      g.filter = 'saturate(1.25) contrast(1.15) brightness(1.08)';
+      g.filter = 'contrast(1.05)';
       g.drawImage(src, 0, 0, ART, ART);
       g.filter = 'none';
       g.globalCompositeOperation = 'source-over';
@@ -246,6 +236,7 @@ export const STYLES: Style[] = [
   },
   {
     key: 'oil',
+    keep: 0.45,
     name: 'Sơn dầu',
     en: 'Oil paint',
     ink: '#3a2a1e',
@@ -288,6 +279,7 @@ export const STYLES: Style[] = [
   },
   {
     key: 'glass',
+    keep: 0.4,
     name: 'Kính màu',
     en: 'Stained glass',
     ink: '#1c1c1c',
@@ -295,10 +287,10 @@ export const STYLES: Style[] = [
     linesOnTop: true,
     paper: '#f5f0e6',
     build(src, rnd) {
-      const R = 240;
+      const R = 300;
       const img = pixels(src, R);
       const d = img.data;
-      const seeds = Array.from({ length: 260 }, () => [rnd() * R, rnd() * R]);
+      const seeds = Array.from({ length: 520 }, () => [rnd() * R, rnd() * R]);
       const cell = new Int16Array(R * R);
       const sum = seeds.map(() => [0, 0, 0, 0]);
       for (let y = 0; y < R; y++)
@@ -321,12 +313,12 @@ export const STYLES: Style[] = [
           sum[best][2] += d[i + 2];
           sum[best][3]++;
         }
-      const col = sum.map(([r, g, b, n]) => saturate([r / (n || 1), g / (n || 1), b / (n || 1)], 1.6));
+      const col = sum.map(([r, g, b, n]) => saturate([r / (n || 1), g / (n || 1), b / (n || 1)], 1.15));
       for (let y = 0; y < R; y++)
         for (let x = 0; x < R; x++) {
           const k = y * R + x;
           const edge = (x < R - 1 && cell[k + 1] !== cell[k]) || (y < R - 1 && cell[k + R] !== cell[k]);
-          const [r, g, b] = edge ? [28, 28, 28] : col[cell[k]];
+          const [r, g, b] = edge ? [40, 40, 40] : col[cell[k]];
           const i = k * 4;
           d[i] = r;
           d[i + 1] = g;
@@ -344,6 +336,7 @@ export const STYLES: Style[] = [
   },
   {
     key: 'dots',
+    keep: 0.4,
     name: 'Chấm điểm',
     en: 'Pointillism',
     ink: '#4d4d6b',
@@ -362,9 +355,9 @@ export const STYLES: Style[] = [
           for (let x = 0; x < ART; x += step) {
             const px = x + (rnd() - 0.5) * step;
             const py = y + (rnd() - 0.5) * step;
-            const [r, gg, b] = saturate(at(px / ART, py / ART), 1.5);
-            const j = (rnd() - 0.5) * 50;
-            g.fillStyle = rgb(r + j, gg - j * 0.5, b + j * 0.3);
+            const [r, gg, b] = saturate(at(px / ART, py / ART), 1.1);
+            const j = (rnd() - 0.5) * 14;
+            g.fillStyle = rgb(r + j, gg + j, b + j);
             g.beginPath();
             g.arc(px, py, rad * (0.7 + rnd() * 0.5), 0, Math.PI * 2);
             g.fill();
@@ -375,6 +368,7 @@ export const STYLES: Style[] = [
   },
   {
     key: 'comic',
+    keep: 0.35,
     name: 'Truyện tranh',
     en: 'Comic',
     ink: '#000',
@@ -387,7 +381,7 @@ export const STYLES: Style[] = [
       const d = img.data;
       const q = (v: number) => Math.min(255, Math.round(v / 85) * 85 + 20);
       for (let i = 0; i < d.length; i += 4) {
-        const [r, g, b] = saturate([d[i], d[i + 1], d[i + 2]], 1.5);
+        const [r, g, b] = saturate([d[i], d[i + 1], d[i + 2]], 1.15);
         d[i] = q(r);
         d[i + 1] = q(g);
         d[i + 2] = q(b);
@@ -395,7 +389,7 @@ export const STYLES: Style[] = [
       const out = upscale(img);
       const g = ctx2(out);
       const L = pixels(src, 56);
-      g.fillStyle = 'rgba(0,0,0,0.55)';
+      g.fillStyle = 'rgba(0,0,0,0.35)';
       for (let y = 0; y < 56; y++)
         for (let x = 0; x < 56; x++) {
           const dark = 1 - lum(L.data, (y * 56 + x) * 4) / 255;
@@ -409,6 +403,7 @@ export const STYLES: Style[] = [
   },
   {
     key: 'ink',
+    keep: 0.55,
     name: 'Thủy mặc màu',
     en: 'Ink wash',
     ink: '#1d2430',
@@ -633,4 +628,15 @@ export function colorPath(rnd: () => number): number[] {
     }
   }
   return out;
+}
+
+/** Vẽ tranh theo phong cách rồi phủ lại ảnh gốc (mức `keep`) để màu và mặt luôn đúng như avatar */
+export function paint(style: Style, src: HTMLCanvasElement, rnd: () => number) {
+  const art = style.build(src, rnd);
+  const g = ctx2(art);
+  g.globalAlpha = style.keep;
+  g.imageSmoothingQuality = 'high';
+  g.drawImage(src, 0, 0, ART, ART);
+  g.globalAlpha = 1;
+  return art;
 }

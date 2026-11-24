@@ -63,6 +63,8 @@ Cách chơi lấy ý từ một game xưởng vẽ trên TikTok mà chủ kênh 
 - Trên màn hình không có chữ kêu gọi tặng quà.
 - 2026-11-24: Avatar lấy cỡ lớn (`avatarLarge`), tranh giữ nét và phong cách nào cũng có màu (Chì than đổi thành Chì màu, Thủy mặc thành Thủy mặc màu).
 - 2026-11-24: Khung "Âm thanh và MC" ở trang điều khiển: nhạc nền nhẹ tự tạo (`music.ts`, bật/tắt + âm lượng), tiếng bút vẽ (`sfx.ts`: bút chì lúc phác, bút dạ lúc tô; nguồn trong CREDITS.md), tốc độ giọng, mức MC nói chuyện (Ít/Vừa/Nhiều trong `TALK`: nhịp chào người vào + giá vẽ trống thì rủ comment). Server nhớ hết.
+- 2026-11-24: Tranh phải giữ đúng màu avatar (như game bắn súng avatar): mỗi phong cách phủ lại ảnh gốc ở mức `keep` (hàm `paint` trong portrait.ts), không đổi bảng màu giả.
+- 2026-11-24: Chọn bản nào thì cả live 1 thứ tiếng: tên họa sĩ, tên phong cách, câu MC đều theo bản; MC không đọc tên quà (TikTok gửi tên quà theo ngôn ngữ tài khoản); đổi bản thì xóa hàng câu đang chờ.
 - 2026-11-24: Bản Việt chỉ nói "vẽ tôi", bản Anh chỉ nói "draw me" (câu MC, chữ trên màn hình, câu rủ vẽ đều theo bản).
 - 2026-11-24: Trang điều khiển gói trong 1 khung dọc 1080×1920 (cột trái: kết nối, giọng, giả lập; cột phải: xem trước + chọn họa sĩ, nền).
 - 2026-11-24: Cổng mặc định 3101 (cổng 3000 có game khác). Link LIVE Studio: `http://lvh.me:3101/?view=stage`.
