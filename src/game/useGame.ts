@@ -6,7 +6,7 @@ import { containsBanned, maskBanned } from '../live/bannedWords';
 import { addScore, NameBatcher, type Players } from '../live/scoreboard';
 import { detectWish, GiftThanker, makePicker, OncePerPerson, RecentPeople, WishLimiter } from '../live/chatter';
 import { IS_STAGE } from '../live/page';
-import { GAME, TEXT, type Lang } from './config';
+import { EN_LINES, GAME, TEXT, type Lang } from './config';
 import type { Job } from './Easel';
 import { STYLES, loadSource } from './portrait';
 import { PAINTERS } from './Painter';
@@ -61,6 +61,13 @@ export function useGame() {
   const [lang, setLang] = useState<Lang>('vi');
   const langRef = useRef(lang);
   langRef.current = lang;
+  // Bộ câu MC + tên đọc được theo bản đang chọn
+  const S = () => (langRef.current === 'en' ? EN_LINES : GAME);
+  const sn = (n: string) => {
+    const s = speakableName(n);
+    return langRef.current === 'en' && s === 'bạn' ? 'friend' : s;
+  };
+  const names = (list: string[], commasOnly = false) => (langRef.current === 'en' ? joinNamesEn(list, commasOnly) : joinNames(list, commasOnly));
   const [feed, setFeed] = useState<FeedItem[]>([]);
   const [lastGift, setLastGift] = useState<GiftEvent | null>(null);
   const [likeProgress, setLikeProgress] = useState(0); // 0..likesPerBoost
@@ -78,7 +85,7 @@ export function useGame() {
     greeter: new NameBatcher(
       GAME.greetEveryMs,
       GAME.namesPerGreeting,
-      (names, more) => voice.say(GAME.greeting(joinNames(names, more > 0), kenh.current, more)),
+      (list, more) => voice.say(S().greeting(names(list, more > 0), kenh.current, more)),
       () => voice.waiting >= 2, // giọng còn nhiều câu chờ thì để lượt sau
     ),
     gifts: new GiftThanker(GAME.giftThanksCooldownMs, GAME.bigGiftCoins),
@@ -103,7 +110,7 @@ export function useGame() {
       talk.recent.note(e.username, speakableName(name));
 
       // Comment có lời cầu chúc -> đọc 1 câu chúc soạn sẵn (không bao giờ đọc nguyên văn comment)
-      const topic = containsBanned(e.comment) ? null : detectWish(e.comment);
+      const topic = containsBanned(e.comment) || langRef.current === 'en' ? null : detectWish(e.comment); // chỉ hiểu lời chúc tiếng Việt
       const reply = topic && pick(GAME.wishReplies[topic] ?? []);
       if (reply && talk.wishes.allow(e.username)) voice.say(reply(speakableName(name)));
 
@@ -128,7 +135,7 @@ export function useGame() {
 
       // Combo / tặng liên tục chỉ cảm ơn 1 lần mỗi 30 giây; quà to luôn cảm ơn. Chen lên trước câu khác.
       const thank = talk.gifts.shouldThank(e.username, coins, voice.waitingPriority);
-      if (thank) voice.say(GAME.thankGift(speakableName(name), e.giftName, kenh.current), true);
+      if (thank) voice.say(S().thankGift(sn(name), e.giftName, kenh.current), true);
 
       // --- Luật chơi: tặng quà thì được vẽ ngay sau bức đang vẽ (xếp sau những người tặng trước) ---
       if (jobRef.current?.username !== e.username) {
@@ -140,7 +147,7 @@ export function useGame() {
           const me = { username: e.username, name, avatar: e.avatar || old?.avatar || '', vip: true };
           return at < 0 ? [...rest, me] : [...rest.slice(0, at), me, ...rest.slice(at)];
         });
-        if (thank) voice.say(GAME.giftPriority(speakableName(name)), true);
+        if (thank) voice.say(S().giftPriority(sn(name)), true);
       }
     },
 
@@ -154,7 +161,7 @@ export function useGame() {
     onFollow: (e) => {
       const name = safeName(e.nickname, e.username);
       pushFeed({ kind: 'follow', name, avatar: e.avatar, text: 'đã theo dõi' });
-      if (talk.follows.first(e.username)) voice.say(GAME.thankFollow(speakableName(name), kenh.current));
+      if (talk.follows.first(e.username)) voice.say(S().thankFollow(sn(name), kenh.current));
     },
 
     onLike: (e) => {
@@ -164,7 +171,7 @@ export function useGame() {
       if (since >= GAME.likesPerBoost) {
         likeBase.current += GAME.likesPerBoost;
         setBoostUntil(Date.now() + GAME.boostSeconds * 1000);
-        voice.say(GAME.boostLine, true);
+        voice.say(S().boostLine, true);
       }
       setLikeProgress(Math.max(0, e.totalLikes - likeBase.current));
     },
@@ -181,7 +188,10 @@ export function useGame() {
       if (c.action === 'setPrefs' && c.text) {
         try {
           const l = JSON.parse(c.text).lang;
-          if (l === 'vi' || l === 'en') setLang(l);
+          if (l === 'vi' || l === 'en') {
+            setLang(l);
+            voice.lang = l;
+          }
         } catch {
           // sai JSON: bỏ qua
         }
@@ -213,8 +223,8 @@ export function useGame() {
     if (GAME.shareReminderEveryMs > 0) {
       timers.push(
         setInterval(() => {
-          const names = talk.recent.latest(3, GAME.shareReminderEveryMs);
-          const line = names.length ? GAME.shareWithNames(joinNames(names), kenh.current) : pick(GAME.shareLines);
+          const recent = talk.recent.latest(3, GAME.shareReminderEveryMs);
+          const line = recent.length ? S().shareWithNames(names(recent), kenh.current) : pick(S().shareLines);
           if (line) voice.say(line);
         }, GAME.shareReminderEveryMs),
       );
@@ -223,7 +233,7 @@ export function useGame() {
       timers.push(
         setInterval(() => {
           if (voice.quietForMs() < GAME.idleAfterMs) return;
-          const line = pick(GAME.idleLines);
+          const line = pick(S().idleLines);
           if (line) voice.say(line);
         }, 15_000),
       );
@@ -259,10 +269,10 @@ export function useGame() {
     const n = doneCount + 1;
     setDoneCount(n);
     setJob(null);
-    if (n % GAME.paintersEvery === 0) voice.say(GAME.painterLine(PAINTERS[(n / GAME.paintersEvery) % PAINTERS.length].name));
+    if (n % GAME.paintersEvery === 0) voice.say(S().painterLine(PAINTERS[(n / GAME.paintersEvery) % PAINTERS.length].name));
     else if (voice.waiting === 0) {
-      const line = pick(GAME.finishLines);
-      if (line) voice.say(line(speakableName(j.name)));
+      const line = pick<(name: string) => string>(S().finishLines);
+      if (line) voice.say(line(sn(j.name)));
     }
   };
 
@@ -302,6 +312,13 @@ export function useGame() {
 export type GameState = ReturnType<typeof useGame>;
 
 // ['An', 'Bình', 'Chi'] -> 'bạn An, bạn Bình và bạn Chi'; commasOnly: 'bạn An, bạn Bình, bạn Chi' (câu sau còn "và N bạn nữa")
+// Bản tiếng Anh: 'A, B and C' (không có chữ "bạn"; tên không đọc được thành "friend")
+function joinNamesEn(names: string[], commasOnly = false) {
+  const spoken = names.map((n) => (n === 'bạn' ? 'friend' : n));
+  if (commasOnly) return spoken.join(', ');
+  return spoken.length > 1 ? `${spoken.slice(0, -1).join(', ')} and ${spoken[spoken.length - 1]}` : spoken[0] ?? '';
+}
+
 function joinNames(names: string[], commasOnly = false) {
   const spoken = names.map((n) => (n === 'bạn' ? n : `bạn ${n}`));
   if (commasOnly) return spoken.join(', ');

@@ -61,4 +61,4 @@ Cách chơi lấy ý từ một game xưởng vẽ trên TikTok mà chủ kênh 
 - 2026-11-24: Mỗi bức vẽ ~3 giây, phác nét xong mới tô màu. 10 phong cách, 10 họa sĩ.
 - Trên màn hình không có chữ kêu gọi tặng quà.
 - 2026-11-24: Cổng mặc định 3101 (cổng 3000 có game khác). Link LIVE Studio: `http://lvh.me:3101/?view=stage`.
-- 2026-11-24: 2 bản, chọn ở trang điều khiển (khung "Bản game"): Tiếng Việt chỉ nhận và hiện "vẽ tôi", English chỉ nhận và hiện "draw me". Chữ trên màn hình đổi theo bản (`TEXT` trong config.ts). Giọng MC vẫn tiếng Việt.
+- 2026-11-24: 2 bản, chọn ở trang điều khiển (khung "Bản game"): Tiếng Việt chỉ nhận và hiện "vẽ tôi", English chỉ nhận và hiện "draw me". Chữ trên màn hình đổi theo bản (`TEXT` trong config.ts). Bản English có MC tiếng Anh (giọng Edge en-US Guy / Jenny, câu trong `EN_LINES`), không đọc lời chúc theo comment.

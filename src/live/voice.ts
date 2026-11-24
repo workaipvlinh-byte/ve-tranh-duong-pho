@@ -37,6 +37,8 @@ class Voice {
   volume = 1;
   /** Giọng khi câu không ghi M:/F: ('M' nam NamMinh, 'F' nữ HoaiMy). Mặc định theo GAME.voice; chọn ở trang điều khiển (server nhớ trong settings.json) */
   defaultWho: VoiceWho = 'M';
+  /** Ngôn ngữ giọng đọc: 'en' thì server dùng giọng tiếng Anh */
+  lang: 'vi' | 'en' = 'vi';
   enabled = IS_STAGE;
 
   /** Server báo trang stage này có phải trang được phát tiếng không (trang mở sau cùng) */
@@ -111,7 +113,7 @@ class Voice {
   }
 
   private urlOf(p: Part) {
-    return `/api/tts?rate=${this.rate}${p.hype ? '&hype=1' : ''}${p.who === 'F' ? '&v=f' : ''}&text=${encodeURIComponent(p.text)}`;
+    return `/api/tts?rate=${this.rate}${p.hype ? '&hype=1' : ''}${p.who === 'F' ? '&v=f' : ''}${this.lang === 'en' ? '&l=en' : ''}&text=${encodeURIComponent(p.text)}`;
   }
 
   private takeNext(): Line | undefined {

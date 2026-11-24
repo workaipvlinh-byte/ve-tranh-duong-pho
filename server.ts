@@ -29,6 +29,9 @@ const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3101; // game n
 // Đổi cao độ không cần sửa code: đặt biến môi trường TTS_PITCH (vd "+6%", "-4%") trong .env hoặc BAT-LIVE.bat
 const TTS_VOICE = process.env.TTS_VOICE || 'vi-VN-NamMinhNeural';
 const TTS_VOICE_F = 'vi-VN-HoaiMyNeural';
+// Bản tiếng Anh của game (l=en): MC nam / nữ tiếng Anh
+const TTS_VOICE_EN = 'en-US-GuyNeural';
+const TTS_VOICE_EN_F = 'en-US-JennyNeural';
 const TTS_PITCH = process.env.TTS_PITCH || '-4%';
 
 // Chặn DNS rebinding: trang web lạ trỏ tên miền của nó về 127.0.0.1 thì Host/Origin sẽ khác các tên dưới đây
@@ -434,10 +437,10 @@ async function edgeTts(text: string, rate: number, voiceName: string, hype: bool
   }
 }
 
-async function googleTts(text: string): Promise<Buffer> {
+async function googleTts(text: string, lang: 'vi' | 'en' = 'vi'): Promise<Buffer> {
   const parts: Buffer[] = [];
   for (const chunk of splitText(text)) {
-    const url = `https://translate.google.com/translate_tts?ie=UTF-8&tl=vi&client=tw-ob&q=${encodeURIComponent(chunk)}`;
+    const url = `https://translate.google.com/translate_tts?ie=UTF-8&tl=${lang}&client=tw-ob&q=${encodeURIComponent(chunk)}`;
     const r = await fetch(url, {
       headers: {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
@@ -458,7 +461,9 @@ app.get('/api/tts', async (req, res) => {
     const rate = Math.min(1.5, Math.max(0.5, Number(req.query.rate) || 1));
     const hype = req.query.hype === '1';
     // chỉ nhận 2 giọng này, không cho truyền tên giọng tuỳ ý
-    const voiceName = req.query.v === 'f' ? TTS_VOICE_F : TTS_VOICE;
+    const en = req.query.l === 'en';
+    const female = req.query.v === 'f';
+    const voiceName = en ? (female ? TTS_VOICE_EN_F : TTS_VOICE_EN) : female ? TTS_VOICE_F : TTS_VOICE;
     const key = `${voiceName}|${rate}|${hype}|${text}`;
     let audio = ttsCache.get(key);
     if (!audio) {
@@ -466,7 +471,7 @@ app.get('/api/tts', async (req, res) => {
         audio = await edgeTts(text, rate, voiceName, hype);
       } catch (err) {
         console.warn('Edge TTS lỗi, chuyển Google:', err instanceof Error ? err.message : err);
-        audio = await googleTts(text);
+        audio = await googleTts(text, en ? 'en' : 'vi');
       }
       ttsCache.set(key, audio);
       if (ttsCache.size > 200) ttsCache.delete(ttsCache.keys().next().value!);

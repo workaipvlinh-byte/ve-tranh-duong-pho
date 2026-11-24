@@ -41,6 +41,25 @@ export const TEXT = {
   },
 };
 
+// Câu MC ở bản tiếng Anh (bản Việt dùng các câu trong GAME bên dưới). Tên kênh không đọc ở bản này.
+export const EN_LINES = {
+  greeting: (names: string, _kenh: string, more = 0) => (more > 0 ? `Welcome ${names} and ${more} more friends!` : `Welcome ${names}!`),
+  thankGift: (name: string, gift: string, _kenh: string) => `Thank you ${name} for the ${gift}!`,
+  giftWishes: ['Have a wonderful day!', 'Wishing you a lucky week!', 'Hope everything goes your way!'],
+  thankFollow: (name: string, _kenh: string) => `Thanks for the follow, ${name}!`,
+  shareWithNames: (names: string, _kenh: string) => `Thanks for hanging out, ${names}. Share the live so your friends can get drawn too!`,
+  shareLines: ['Enjoying the show? Share the live with your friends!', 'More friends, more portraits. Tap share and bring them in!'],
+  idleLines: ['Want your portrait? Just comment draw me!', 'Comment draw me and our painter will draw you!', 'Tap those likes to light up the lanterns!'],
+  boostLine: 'Likes are full. Lanterns on!',
+  giftPriority: (name: string) => `${name}, you are up right after this one!`,
+  finishLines: [
+    (name: string) => `Here is your portrait, ${name}!`,
+    (name: string) => `All done, ${name}. Up on the line it goes!`,
+    (name: string) => `${name}, your portrait is ready. Next in line, get ready!`,
+  ],
+  painterLine: (painter: string) => `Shift change! ${painter} takes over the brush.`,
+};
+
 export const GAME = {
   title: 'XƯỞNG VẼ PHỐ HỘI',
   subtitle: 'Comment “vẽ tôi” để được vẽ chân dung',
