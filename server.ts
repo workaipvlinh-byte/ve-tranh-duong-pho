@@ -501,7 +501,14 @@ app.get('/api/avatar', async (req, res) => {
   }
   if (url.protocol !== 'https:' || !AVATAR_HOSTS.test(url.hostname)) return res.status(400).end();
   try {
-    const r = await fetch(url, { redirect: 'error', signal: AbortSignal.timeout(8000) });
+    // CDN TikTok hay chuyển hướng sang máy chủ ảnh khác: đi theo tối đa 3 lần, lần nào cũng kiểm lại host
+    let r = await fetch(url, { redirect: 'manual', signal: AbortSignal.timeout(8000) });
+    for (let hop = 0; hop < 3 && r.status >= 300 && r.status < 400; hop++) {
+      const next = new URL(r.headers.get('location') || '', url);
+      if (next.protocol !== 'https:' || !AVATAR_HOSTS.test(next.hostname)) return res.status(400).end();
+      url = next;
+      r = await fetch(url, { redirect: 'manual', signal: AbortSignal.timeout(8000) });
+    }
     // chỉ ảnh thường (không nhận SVG/HTML: trả cùng nguồn với trang thì có thể chạy script)
     const type = (r.headers.get('content-type') || '').split(';')[0].trim().toLowerCase();
     if (!r.ok || !['image/jpeg', 'image/png', 'image/webp', 'image/gif'].includes(type)) return res.status(502).end();

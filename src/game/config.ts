@@ -44,6 +44,10 @@ export const TEXT = {
 // Câu MC ở bản tiếng Anh (bản Việt dùng các câu trong GAME bên dưới). Tên kênh không đọc ở bản này.
 export const EN_LINES = {
   greeting: (names: string, _kenh: string, more = 0) => (more > 0 ? `Welcome ${names} and ${more} more friends!` : `Welcome ${names}!`),
+  greetCrowd: (n: number, _kenh: string) => `Welcome to the ${n} friends who just dropped by!`,
+  // Báo người vừa comment draw me đã vào hàng (gộp khi đông)
+  queueJoin: (names: string, more = 0) => (more > 0 ? `${names} and ${more} more are in line for a portrait!` : `${names}, you are in line for a portrait!`),
+  queueJoinCrowd: (n: number) => `${n} more friends just joined the line!`,
   thankGift: (name: string, _gift: string, _kenh: string) => `Thank you so much for the gift, ${name}!`,
   giftWishes: ['Have a wonderful day!', 'Wishing you a lucky week!', 'Hope everything goes your way!'],
   thankFollow: (name: string, _kenh: string) => `Thanks for the follow, ${name}!`,
@@ -113,6 +117,10 @@ export const GAME = {
   // more > 0: phòng đông, gộp "chào bạn A, bạn B, bạn C và 25 bạn nữa"
   greeting: (names: string, kenh: string, more = 0) =>
     more > 0 ? `${kenh} chào ${names} và ${more} bạn nữa vừa vào chơi.` : `${kenh} chào ${names} vừa vào chơi.`,
+  greetCrowd: (n: number, kenh: string) => `${kenh} chào ${n} bạn vừa ghé live nha.`,
+  // Báo người vừa comment vẽ tôi đã vào hàng (gộp khi đông)
+  queueJoin: (names: string, more = 0) => (more > 0 ? `${names} và ${more} bạn nữa đã vào hàng vẽ nha.` : `${names} vào hàng vẽ rồi nha.`),
+  queueJoinCrowd: (n: number) => `Thêm ${n} bạn vừa vào hàng vẽ nha.`,
 
   // ---------- Cảm ơn quà ----------
   // Cùng 1 người tặng liên tục / combo: chỉ cảm ơn 1 lần mỗi 30 giây. Quà từ 99 xu luôn được cảm ơn.

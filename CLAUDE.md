@@ -14,7 +14,7 @@ Cách chơi lấy ý từ một game xưởng vẽ trên TikTok mà chủ kênh 
 - Hàng chờ: tối đa 300 người, khu chờ hiện 32 người đầu (zíc zắc, người đầu ở góc sát họa sĩ), còn lại hiện "+N người đang chờ".
 - Quà: người tặng được vẽ ngay sau bức đang vẽ, xếp sau những người tặng trước đó. Có viền vàng, sao, khung tranh vàng trên dây. MC cảm ơn và báo "được vẽ ngay sau bức này".
 - Tim: đủ 500 tim thì đèn lồng sáng rực 30 giây.
-- Mỗi bức chọn ngẫu nhiên 1 trong 10 phong cách (không lặp bức liền trước).
+- Mỗi bức: phác nét chì (dò từ avatar) rồi tô màu (lộ dần chính ảnh avatar), xong thì đặt thẳng ảnh avatar gốc lên giá và treo lên dây (như game bắn súng avatar). Không còn 10 phong cách.
 - Họa sĩ (10 người) và nền (10 nền, `BACKGROUNDS` trong Scene.tsx) do chủ kênh chọn ở trang điều khiển, giữ nguyên suốt buổi, không đổi ngẫu nhiên.
 - Dây treo giữ 6 bức mới nhất, bức cũ rơi xuống.
 
@@ -32,7 +32,8 @@ Cách chơi lấy ý từ một game xưởng vẽ trên TikTok mà chủ kênh 
 - `src/game/config.ts`: số liệu, câu đọc, từ khóa. Sửa nhỏ thì sửa ở đây trước.
 - `src/game/useGame.ts`: luật chơi (xử lý chat, quà, tim, người vào).
 - `src/game/GameStage.tsx`: màn hình trên live, khung 1080×1920.
-- `src/game/portrait.ts`: bộ vẽ tranh. Dò nét từ avatar, 10 phong cách (`STYLES`), mặt hoạt hình tự sinh khi không có avatar.
+- `src/game/portrait.ts`: bộ vẽ tranh. Dò nét từ avatar, lớp màu là chính ảnh avatar (`photo`), mặt hoạt hình tự sinh khi không tải được avatar.
+- `src/game/announcer.ts`: danh sách tên chờ MC đọc (gộp khi đông, quá hạn thì bỏ). Tự kiểm: `npx tsx src/game/announcer.check.ts`.
 - `src/game/Easel.tsx`: giá vẽ, chạy 1 phiên vẽ (phác nét, tô màu theo vệt cọ zíc zắc, khoe tranh), báo vị trí đầu cọ cho họa sĩ.
 - `src/game/Painter.tsx`: 10 họa sĩ (`PAINTERS`) vẽ bằng SVG, tay cầm cọ chạy theo đầu cọ (IK 2 khớp), chớp mắt, thở, nghiêng người.
 - `src/game/Scene.tsx`: nền phố Hội (nhà vàng, mái ngói, sông, cầu, đèn lồng, sân gạch, giá vẽ).
@@ -63,7 +64,9 @@ Cách chơi lấy ý từ một game xưởng vẽ trên TikTok mà chủ kênh 
 - Trên màn hình không có chữ kêu gọi tặng quà.
 - 2026-11-24: Avatar lấy cỡ lớn (`avatarLarge`), tranh giữ nét và phong cách nào cũng có màu (Chì than đổi thành Chì màu, Thủy mặc thành Thủy mặc màu).
 - 2026-11-24: Khung "Âm thanh và MC" ở trang điều khiển: nhạc nền nhẹ tự tạo (`music.ts`, bật/tắt + âm lượng), tiếng bút vẽ (`sfx.ts`: bút chì lúc phác, bút dạ lúc tô; nguồn trong CREDITS.md), tốc độ giọng, mức MC nói chuyện (Ít/Vừa/Nhiều trong `TALK`: nhịp chào người vào + giá vẽ trống thì rủ comment). Server nhớ hết.
-- 2026-11-24: Tranh phải giữ đúng màu avatar (như game bắn súng avatar): mỗi phong cách phủ lại ảnh gốc ở mức `keep` (hàm `paint` trong portrait.ts), không đổi bảng màu giả.
+- 2026-11-24: Bỏ 10 phong cách. Vẽ chỉ có phác chì + tô màu, kết thúc đưa thẳng ảnh avatar gốc (như game bắn súng).
+- 2026-11-24: MC xếp lượt: quà > người vào hàng vẽ (gộp tên, quá 20 giây bỏ) > chào người vào (chỉ khi MC im, đông thì gộp "A, B, C và N bạn nữa", quá 25 giây bỏ). Chỉ thêm câu khi không còn câu chờ nên không chồng giọng.
+- (cũ) 2026-11-24: Tranh phải giữ đúng màu avatar (như game bắn súng avatar): mỗi phong cách phủ lại ảnh gốc ở mức `keep` (hàm `paint` trong portrait.ts), không đổi bảng màu giả.
 - 2026-11-24: Chọn bản nào thì cả live 1 thứ tiếng: tên họa sĩ, tên phong cách, câu MC đều theo bản; MC không đọc tên quà (TikTok gửi tên quà theo ngôn ngữ tài khoản); đổi bản thì xóa hàng câu đang chờ.
 - 2026-11-24: Bản Việt chỉ nói "vẽ tôi", bản Anh chỉ nói "draw me" (câu MC, chữ trên màn hình, câu rủ vẽ đều theo bản).
 - 2026-11-24: Trang điều khiển gói trong 1 khung dọc 1080×1920 (cột trái: kết nối, giọng, giả lập; cột phải: xem trước + chọn họa sĩ, nền).

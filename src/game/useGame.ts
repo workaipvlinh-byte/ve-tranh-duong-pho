@@ -3,14 +3,15 @@ import { useLiveEvents } from '../live/useLiveEvents';
 import type { GiftEvent, LiveStatus } from '../live/types';
 import { voice, speakableName } from '../live/voice';
 import { containsBanned, maskBanned } from '../live/bannedWords';
-import { addScore, NameBatcher, type Players } from '../live/scoreboard';
+import { addScore, type Players } from '../live/scoreboard';
+import { Pending } from './announcer';
 import { detectWish, GiftThanker, makePicker, OncePerPerson, RecentPeople, WishLimiter } from '../live/chatter';
 import { IS_STAGE } from '../live/page';
 import { EN_LINES, GAME, TALK, TEXT, type Lang, type TalkLevel } from './config';
 import { music } from './music';
 import { sfx } from './sfx';
 import type { Job } from './Easel';
-import { STYLES, loadSource } from './portrait';
+import { loadSource } from './portrait';
 import { PAINTERS } from './Painter';
 import { BACKGROUNDS } from './Scene';
 
@@ -44,7 +45,7 @@ export interface Hung {
   name: string;
   img: string;
   vip: boolean;
-  style: string;
+  avatar: string; // ảnh avatar gốc treo lên dây (như game bắn súng); trống thì dùng ảnh vẽ
 }
 
 /**
@@ -60,7 +61,6 @@ export function useGame() {
   const [doneCount, setDoneCount] = useState(0);
   const jobRef = useRef(job);
   jobRef.current = job;
-  const lastStyle = useRef(-1);
   const [lang, setLang] = useState<Lang>('vi');
   const [painterIdx, setPainterIdx] = useState(0);
   const [bg, setBg] = useState(0);
@@ -92,12 +92,9 @@ export function useGame() {
 
   // Luật nói chuyện chung (xem src/live/chatter.ts). Tạo 1 lần, giữ nguyên suốt buổi live.
   const [talk] = useState(() => ({
-    greeter: new NameBatcher(
-      GAME.greetEveryMs,
-      GAME.namesPerGreeting,
-      (list, more) => voice.say(S().greeting(names(list, more > 0), kenh.current, more)),
-      () => voice.waiting >= 2, // giọng còn nhiều câu chờ thì để lượt sau
-    ),
+    // Chào người vào (mỗi người 1 lần, chờ quá 25 giây chưa kịp chào thì bỏ) và báo người vào hàng vẽ (quá 20 giây thì bỏ)
+    greets: new Pending(25_000, true),
+    joins: new Pending(20_000, false),
     gifts: new GiftThanker(GAME.giftThanksCooldownMs, GAME.bigGiftCoins),
     follows: new OncePerPerson(),
     wishes: new WishLimiter(GAME.wishPerUserMs, GAME.wishGlobalMs),
@@ -127,6 +124,10 @@ export function useGame() {
       // --- Luật chơi: comment "vẽ tôi" / "draw me" thì vào cuối hàng (đang chờ hoặc đang được vẽ thì thôi) ---
       if (TEXT[langRef.current].keywords.some((k) => compact(e.comment).includes(k))) {
         if (jobRef.current?.username === e.username) return;
+        if (!queueRef.current.some((w) => w.username === e.username) && queueRef.current.length < GAME.maxQueue) {
+          talk.greets.remove(e.username); // đã gọi tên lúc vào hàng thì khỏi chào riêng
+          talk.joins.add(e.username, speakableName(name));
+        }
         setQueue((q) =>
           q.length >= GAME.maxQueue || q.some((w) => w.username === e.username)
             ? q
@@ -165,7 +166,7 @@ export function useGame() {
       const name = safeName(e.nickname, e.username);
       pushFeed({ kind: 'join', name, avatar: e.avatar, text: 'vừa vào' });
       const spoken = speakableName(name);
-      if (spoken !== 'bạn') talk.greeter.add(e.username, spoken); // mỗi người chào 1 lần; tên đọc không được thì thôi
+      talk.greets.add(e.username, spoken); // tên không đọc được vẫn tính vào "N bạn nữa"
     },
 
     onFollow: (e) => {
@@ -225,7 +226,6 @@ export function useGame() {
             voice.rate = n.rate;
             music.on = n.musicOn;
             music.level = n.musicVol / 100;
-            talk.greeter.everyMs = TALK[n.talk].greetEveryMs;
             return n;
           });
         } catch {
@@ -237,7 +237,8 @@ export function useGame() {
       if (c.action === 'setRate' && c.text) voice.rate = Number(c.text) || 1;
       if (c.action === 'reset') {
         voice.stop();
-        talk.greeter.reset();
+        talk.greets.reset();
+        talk.joins.reset();
         talk.gifts.reset();
         talk.follows.reset();
         talk.wishes.reset();
@@ -265,6 +266,32 @@ export function useGame() {
         }, GAME.shareReminderEveryMs),
       );
     }
+    // MC xếp lượt nói: quà (hàng ưu tiên, xử lý ở onGift) > người vào hàng vẽ > chào người vào.
+    // Chỉ thêm câu khi không còn câu nào chờ, nên câu nối nhau từng câu một, không bao giờ chồng giọng.
+    let lastJoinSay = 0;
+    let lastGreet = 0;
+    timers.push(
+      setInterval(() => {
+        const now = Date.now();
+        if (voice.waiting > 0 || voice.waitingPriority > 0) return;
+        if (talk.joins.size && now - lastJoinSay >= 3000) {
+          const b = talk.joins.take(GAME.namesPerGreeting, now);
+          if (b) {
+            lastJoinSay = now;
+            const line = b.names.length ? S().queueJoin(names(b.names.map(sn), b.more > 0), b.more) : S().queueJoinCrowd(b.more);
+            voice.say(line);
+            return;
+          }
+        }
+        // chào: chỉ khi MC đang im hẳn và không còn ai mới vào hàng chờ báo
+        if (voice.busy || talk.joins.size || now - lastGreet < TALK[talkRef.current].greetEveryMs) return;
+        const g = talk.greets.take(GAME.namesPerGreeting, now);
+        if (!g) return;
+        lastGreet = now;
+        voice.say(g.names.length ? S().greeting(names(g.names.map(sn), g.more > 0), kenh.current, g.more) : S().greetCrowd(g.more, kenh.current));
+      }, 500),
+    );
+
     // Rủ vẽ khi giá vẽ trống: thưa hay dày theo mức tương tác; có người vừa ghé thì gọi tên
     let lastInvite = Date.now();
     timers.push(
@@ -297,11 +324,8 @@ export function useGame() {
     if (job || !queue.length) return;
     const t = setTimeout(() => {
       const [next, ...rest] = queue;
-      let style = Math.floor(Math.random() * STYLES.length);
-      if (style === lastStyle.current) style = (style + 1) % STYLES.length;
-      lastStyle.current = style;
       setQueue(rest);
-      setJob({ id: ++jobId, username: next.username, name: next.name, avatar: next.avatar, style, vip: next.vip });
+      setJob({ id: ++jobId, username: next.username, name: next.name, avatar: next.avatar, vip: next.vip });
     }, 500);
     return () => clearTimeout(t);
   }, [job, queue]);
@@ -316,7 +340,7 @@ export function useGame() {
   const finish = (id: number, img: string) => {
     const j = jobRef.current;
     if (!j || j.id !== id) return;
-    setGallery((g) => [{ id, name: j.name, img, vip: j.vip, style: STYLES[j.style].name }, ...g].slice(0, GAME.galleryMax));
+    setGallery((g) => [{ id, name: j.name, img, vip: j.vip, avatar: j.avatar }, ...g].slice(0, GAME.galleryMax));
     const n = doneCount + 1;
     setDoneCount(n);
     setJob(null);

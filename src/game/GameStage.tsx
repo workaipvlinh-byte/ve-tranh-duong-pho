@@ -5,7 +5,6 @@ import { GAME, TEXT } from './config';
 import { Scene } from './Scene';
 import { Easel } from './Easel';
 import { Painter } from './Painter';
-import { STYLES } from './portrait';
 import { CANVAS, QUEUE, STRING_Y, type Brush } from './layout';
 
 const INK = '#2a1d17';
@@ -71,7 +70,7 @@ export function GameStage({ game }: { game: GameState }) {
                   className="-mt-1 rounded-md p-[6px] shadow-lg"
                   style={{ background: g.vip ? 'linear-gradient(135deg,#ffe082,#f4b400,#ffe082)' : '#8b5a2b', border: `4px solid ${INK}` }}
                 >
-                  <img src={g.img} className="block h-[116px] w-[116px] rounded-sm" />
+                  <img src={g.avatar || g.img} referrerPolicy="no-referrer" onError={(e) => (e.currentTarget.src = g.img)} className="block h-[116px] w-[116px] rounded-sm object-cover" />
                 </div>
                 <div className="mt-1 truncate rounded-full bg-white/90 px-2 text-center text-[22px] font-bold text-[#2a1d17]">
                   {g.vip && '⭐ '}
@@ -119,9 +118,6 @@ export function GameStage({ game }: { game: GameState }) {
             >
               {job.vip && '⭐ '}
               {job.name}
-            </div>
-            <div className="mt-2 rounded-full bg-[#2a1d17]/80 px-5 py-1 text-[28px] font-semibold text-amber-100">
-              {T.style}: {game.lang === 'en' ? STYLES[job.style].en : STYLES[job.style].name}
             </div>
           </motion.div>
         )}

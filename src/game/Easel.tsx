@@ -1,8 +1,7 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   ART,
-  paint,
-  STYLES,
+  photo,
   colorPath,
   loadSource,
   seeded,
@@ -17,11 +16,13 @@ export interface Job {
   username: string;
   name: string;
   avatar: string;
-  style: number;
   vip: boolean;
 }
 
 const k = CANVAS.size / ART;
+const INK = "#3b2a20"; // nét chì
+const PAPER = "#fbf6ec";
+const LINE_W = 3;
 const ease = (t: number) => (t < 0.5 ? 2 * t * t : 1 - (-2 * t + 2) ** 2 / 2);
 const mk = () => {
   const c = document.createElement("canvas");
@@ -43,6 +44,7 @@ export function Easel({
 }) {
   const ref = useRef<HTMLCanvasElement>(null);
   const done = useRef(onDone);
+  const [real, setReal] = useState(false);
   done.current = onDone;
 
   useEffect(() => {
@@ -67,10 +69,9 @@ export function Easel({
     (async () => {
       const src = await loadSource(job.username, job.name, job.avatar);
       if (stop) return;
-      const style = STYLES[job.style];
       const rnd = seeded(job.username + job.id);
       const lines = traceLines(src, rnd);
-      const art = paint(style, src, rnd);
+      const art = photo(src); // tô màu = lộ dần chính ảnh avatar
       const path = colorPath(rnd);
       const total = lines.reduce((s, l) => s + l.length / 2, 0);
       const segLen: number[] = [0];
@@ -83,7 +84,7 @@ export function Easel({
 
       const lineLayer = mk();
       const lg = lineLayer.getContext("2d")!;
-      lg.strokeStyle = style.ink;
+      lg.strokeStyle = INK;
       lg.lineCap = lg.lineJoin = "round";
       const mask = mk();
       const mg = mask.getContext("2d")!;
@@ -99,12 +100,12 @@ export function Easel({
       let seg = 1; // đoạn kế tiếp của đường tô màu
       let bx = ART / 2;
       let by = 0;
-      brush.color = style.ink;
+      brush.color = INK;
 
       const render = (color: boolean) => {
-        view.fillStyle = style.paper;
+        view.fillStyle = PAPER;
         view.fillRect(0, 0, ART, ART);
-        if (!style.linesOnTop) view.drawImage(lineLayer, 0, 0);
+        view.drawImage(lineLayer, 0, 0); // màu phủ lên nét chì
         if (color) {
           tg.globalCompositeOperation = "source-over";
           tg.clearRect(0, 0, ART, ART);
@@ -113,12 +114,11 @@ export function Easel({
           tg.drawImage(mask, 0, 0);
           view.drawImage(tmp, 0, 0);
         }
-        if (style.linesOnTop) view.drawImage(lineLayer, 0, 0);
       };
       const drawLinesTo = (target: number) => {
         while (drawn < target && ci < lines.length) {
           const L = lines[ci];
-          if (pi === 0) lg.lineWidth = style.lineW * (0.8 + rnd() * 0.5);
+          if (pi === 0) lg.lineWidth = LINE_W * (0.8 + rnd() * 0.5);
           else {
             lg.beginPath();
             lg.moveTo(L[pi * 2 - 2], L[pi * 2 - 1]);
@@ -175,12 +175,14 @@ export function Easel({
             mg.fillRect(0, 0, ART, ART);
             render(true);
             brush.mode = "show";
+            setReal(true); // xong: đặt thẳng ảnh avatar gốc lên giá (như game bắn súng)
           }
         } else {
           const thumb = document.createElement("canvas");
           thumb.width = thumb.height = 240;
           thumb.getContext("2d")!.drawImage(ref.current!, 0, 0, 240, 240);
           brush.mode = "idle";
+          setReal(false);
           done.current(job.id, thumb.toDataURL("image/jpeg", 0.82));
           return;
         }
@@ -194,20 +196,35 @@ export function Easel({
       stop = true;
       cancelAnimationFrame(raf);
     };
-  }, [job?.id, job ? '' : lang]);
+  }, [job?.id, job ? "" : lang]);
 
   return (
-    <canvas
-      ref={ref}
-      width={ART}
-      height={ART}
-      className="absolute"
-      style={{
-        left: CANVAS.x,
-        top: CANVAS.y,
-        width: CANVAS.size,
-        height: CANVAS.size,
-      }}
-    />
+    <>
+      <canvas
+        ref={ref}
+        width={ART}
+        height={ART}
+        className="absolute"
+        style={{
+          left: CANVAS.x,
+          top: CANVAS.y,
+          width: CANVAS.size,
+          height: CANVAS.size,
+        }}
+      />
+      {real && job?.avatar && (
+        <img
+          src={job.avatar}
+          referrerPolicy="no-referrer"
+          className="absolute object-cover"
+          style={{
+            left: CANVAS.x,
+            top: CANVAS.y,
+            width: CANVAS.size,
+            height: CANVAS.size,
+          }}
+        />
+      )}
+    </>
   );
 }
