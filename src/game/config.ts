@@ -50,6 +50,15 @@ export const EN_LINES = {
   shareWithNames: (names: string, _kenh: string) => `Thanks for hanging out, ${names}. Share the live so your friends can get drawn too!`,
   shareLines: ['Enjoying the show? Share the live with your friends!', 'More friends, more portraits. Tap share and bring them in!'],
   idleLines: ['Want your portrait? Just comment draw me!', 'Comment draw me and our painter will draw you!', 'Tap those likes to light up the lanterns!'],
+  // Rủ vẽ khi giá vẽ trống (không ai chờ)
+  inviteLines: [
+    'The easel is free! Comment draw me and get your portrait.',
+    'Our painter is waiting. Comment draw me and you are next!',
+    'No line right now. First to comment draw me gets drawn first!',
+    'Want your portrait on the line up there? Just comment draw me.',
+    'Free portraits today, everyone. Comment draw me!',
+  ],
+  inviteWithName: (name: string) => `Hey ${name}, comment draw me and our painter will draw you!`,
   boostLine: 'Likes are full. Lanterns on!',
   giftPriority: (name: string) => `${name}, you are up right after this one!`,
   finishLines: [
@@ -57,6 +66,14 @@ export const EN_LINES = {
     (name: string) => `All done, ${name}. Up on the line it goes!`,
     (name: string) => `${name}, your portrait is ready. Next in line, get ready!`,
   ],
+};
+
+// Mức tương tác của MC (chọn ở trang điều khiển): chào người vào nhanh hay chậm, rủ vẽ khi vắng thường hay thưa
+export type TalkLevel = 'low' | 'mid' | 'high';
+export const TALK: Record<TalkLevel, { name: string; greetEveryMs: number; inviteEveryMs: number }> = {
+  low: { name: 'Ít', greetEveryMs: 12_000, inviteEveryMs: 50_000 },
+  mid: { name: 'Vừa', greetEveryMs: 6_000, inviteEveryMs: 25_000 },
+  high: { name: 'Nhiều', greetEveryMs: 3_500, inviteEveryMs: 12_000 },
 };
 
 export const GAME = {
@@ -162,9 +179,18 @@ export const GAME = {
   // ---------- Live im quá lâu ----------
   // Giọng im quá 90 giây thì đọc 1 câu cho đỡ trống.
   idleAfterMs: 90_000,
+  // Rủ vẽ khi giá vẽ trống (không ai chờ)
+  inviteLines: [
+    'Giá vẽ đang trống nè, ai muốn có chân dung thì comment vẽ tôi nha.',
+    'Họa sĩ đang rảnh tay, comment vẽ tôi là vẽ liền cho bạn.',
+    'Chưa ai xếp hàng hết, bạn nào comment vẽ tôi trước là được vẽ trước nha.',
+    'Muốn có tấm chân dung treo lên dây không? Comment vẽ tôi thôi.',
+    'Vẽ miễn phí nè cả nhà, comment vẽ tôi để họa sĩ vẽ bạn.',
+  ],
+  inviteWithName: (name: string) => `Bạn ${name} ơi, comment vẽ tôi để họa sĩ vẽ bạn nha.`,
   idleLines: [
     'Ai muốn có chân dung thì comment vẽ tôi nha, họa sĩ vẽ liền.',
-    'Comment vẽ tôi hoặc draw me là được xếp hàng vẽ chân dung.',
+    'Comment vẽ tôi là được xếp hàng vẽ chân dung nha cả nhà.',
     'Cả nhà thả tim cho đầy thanh, đủ tim là cả phố lên đèn.',
   ],
 

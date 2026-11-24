@@ -51,7 +51,7 @@ export class NameBatcher {
   private seen = new Set<string>();
   private timer: ReturnType<typeof setInterval> | null = null;
   constructor(
-    private everyMs: number,
+    public everyMs: number, // đổi được khi đang chạy (áp dụng từ lượt hẹn giờ kế tiếp)
     private perBatch: number,
     private flush: (names: string[], more: number) => void,
     private isBusy: () => boolean = () => false,

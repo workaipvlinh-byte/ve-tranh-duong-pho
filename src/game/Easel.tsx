@@ -9,6 +9,7 @@ import {
 } from "./portrait";
 import { CANVAS, TIMES, type Brush } from "./layout";
 import { TEXT, type Lang } from "./config";
+import { sfx } from "./sfx";
 
 export interface Job {
   id: number;
@@ -135,16 +136,27 @@ export function Easel({
       };
 
       const t0 = performance.now();
+      // tiếng bút chì 2 lượt trong lúc phác nét, tiếng tô màu khi chuyển sang tô
+      let pencils = 0;
+      let colored = false;
       const frame = (now: number) => {
         if (stop) return;
         const t = now - t0;
         if (t < TIMES.line) {
           brush.mode = "line";
+          if (pencils < 2 && t >= pencils * 750) {
+            pencils++;
+            sfx.play("pencil");
+          }
           drawLinesTo(total * ease(t / TIMES.line));
           render(false);
         } else if (t < TIMES.line + TIMES.color) {
           drawLinesTo(Infinity);
           brush.mode = "color";
+          if (!colored) {
+            colored = true;
+            sfx.play("color");
+          }
           brush.color = "#c0392b";
           const want = pathLen * ease((t - TIMES.line) / TIMES.color);
           while (seg < segLen.length && segLen[seg - 1] < want) {

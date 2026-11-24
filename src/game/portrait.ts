@@ -4,7 +4,8 @@
 // Toàn bộ vẽ bằng canvas, không dùng ảnh ngoài.
 
 export const ART = 560; // cỡ tranh (điểm ảnh trong canvas)
-const SRC = 96; // cỡ ảnh nguồn đem dò nét
+const SRC = 96; // cỡ ảnh đem dò nét
+const SRC_HI = 256; // cỡ ảnh nguồn giữ lại để tô màu (avatar lớn thì tranh nét)
 
 export interface Style {
   key: string;
@@ -99,7 +100,7 @@ export const STYLES: Style[] = [
     linesOnTop: false,
     paper: '#efe4d0',
     build(src, rnd) {
-      const T = 30;
+      const T = 42;
       const s = ART / T;
       const at = sampler(src);
       const c = mk(ART);
@@ -109,7 +110,7 @@ export const STYLES: Style[] = [
           const [r, gg, b] = saturate(at((x + 0.5) / T, (y + 0.5) / T), 1.25);
           const j = (rnd() - 0.5) * 26;
           g.fillStyle = rgb(r + j, gg + j, b + j);
-          const inset = 1.6 + rnd() * 0.8;
+          const inset = 0.7 + rnd() * 0.5;
           g.beginPath();
           g.roundRect(x * s + inset, y * s + inset, s - inset * 2, s - inset * 2, 3);
           g.fill();
@@ -128,7 +129,7 @@ export const STYLES: Style[] = [
     linesOnTop: false,
     paper: '#f4f1ea',
     build(src) {
-      const img = pixels(src, 28);
+      const img = pixels(src, 44);
       const d = img.data;
       const q = (v: number) => Math.round(v / 51) * 51;
       for (let i = 0; i < d.length; i += 4) {
@@ -151,21 +152,25 @@ export const STYLES: Style[] = [
     build(src, rnd) {
       const c = mk(ART);
       const g = paper(c, '#fbf6ec', rnd);
-      g.globalAlpha = 0.8;
-      g.filter = 'blur(7px) saturate(1.4) brightness(1.08)';
-      g.drawImage(src, 14, 14, ART - 28, ART - 28);
+      g.globalAlpha = 0.85;
+      g.filter = 'blur(3px) saturate(1.4) brightness(1.06)';
+      g.drawImage(src, 10, 10, ART - 20, ART - 20);
       g.filter = 'none';
       const at = sampler(src);
-      for (let i = 0; i < 380; i++) {
+      for (let i = 0; i < 260; i++) {
         const u = rnd();
         const v = rnd();
         const [r, gg, b] = saturate(at(u, v), 1.5);
-        g.globalAlpha = 0.18 + rnd() * 0.15;
+        g.globalAlpha = 0.1 + rnd() * 0.1;
         g.fillStyle = rgb(r, gg, b);
         g.beginPath();
-        g.arc(u * ART, v * ART, 8 + rnd() * 20, 0, Math.PI * 2);
+        g.arc(u * ART, v * ART, 6 + rnd() * 14, 0, Math.PI * 2);
         g.fill();
       }
+      g.globalAlpha = 0.45;
+      g.filter = 'saturate(1.3) contrast(1.05)';
+      g.drawImage(src, 10, 10, ART - 20, ART - 20);
+      g.filter = 'none';
       g.globalAlpha = 1;
       return c;
     },
@@ -200,8 +205,8 @@ export const STYLES: Style[] = [
   },
   {
     key: 'sketch',
-    name: 'Chì than',
-    en: 'Charcoal',
+    name: 'Chì màu',
+    en: 'Colored pencil',
     ink: '#2b2b2b',
     lineW: 2.5,
     linesOnTop: true,
@@ -209,13 +214,14 @@ export const STYLES: Style[] = [
     build(src, rnd) {
       const c = mk(ART);
       const g = paper(c, '#f6f3ee', rnd, 1400);
-      g.globalAlpha = 0.35;
+      g.globalAlpha = 0.75;
       g.globalCompositeOperation = 'multiply';
-      g.filter = 'grayscale(1) contrast(1.6)';
+      g.filter = 'saturate(1.25) contrast(1.15) brightness(1.08)';
       g.drawImage(src, 0, 0, ART, ART);
       g.filter = 'none';
       g.globalCompositeOperation = 'source-over';
       const img = pixels(src, 140);
+      const at = sampler(src);
       g.lineCap = 'round';
       for (let i = 0; i < 4200; i++) {
         const u = rnd();
@@ -225,8 +231,9 @@ export const STYLES: Style[] = [
         if (rnd() > dark * 1.2) continue;
         const a = dark > 0.55 && rnd() < 0.5 ? -Math.PI / 4 : Math.PI / 4;
         const L = 8 + rnd() * 10;
-        g.globalAlpha = 0.25 + dark * 0.45;
-        g.strokeStyle = '#333';
+        g.globalAlpha = 0.2 + dark * 0.35;
+        const [hr, hg, hb] = saturate(at(u, v), 1.4);
+        g.strokeStyle = rgb(hr * 0.6, hg * 0.6, hb * 0.6);
         g.lineWidth = 1.2;
         g.beginPath();
         g.moveTo(u * ART - Math.cos(a) * L, v * ART - Math.sin(a) * L);
@@ -249,12 +256,12 @@ export const STYLES: Style[] = [
       const at = sampler(src);
       const c = mk(ART);
       const g = ctx2(c);
-      g.filter = 'blur(10px)';
+      g.filter = 'blur(3px) saturate(1.2)';
       g.drawImage(src, 0, 0, ART, ART);
       g.filter = 'none';
       for (const [n, big] of [
-        [1400, 1],
-        [1800, 0.6],
+        [1200, 0.8],
+        [2600, 0.45],
       ] as const) {
         for (let i = 0; i < n; i++) {
           const u = rnd();
@@ -273,6 +280,9 @@ export const STYLES: Style[] = [
           g.restore();
         }
       }
+      g.globalAlpha = 0.3;
+      g.drawImage(src, 0, 0, ART, ART);
+      g.globalAlpha = 1;
       return c;
     },
   },
@@ -285,10 +295,10 @@ export const STYLES: Style[] = [
     linesOnTop: true,
     paper: '#f5f0e6',
     build(src, rnd) {
-      const R = 200;
+      const R = 240;
       const img = pixels(src, R);
       const d = img.data;
-      const seeds = Array.from({ length: 150 }, () => [rnd() * R, rnd() * R]);
+      const seeds = Array.from({ length: 260 }, () => [rnd() * R, rnd() * R]);
       const cell = new Int16Array(R * R);
       const sum = seeds.map(() => [0, 0, 0, 0]);
       for (let y = 0; y < R; y++)
@@ -345,8 +355,8 @@ export const STYLES: Style[] = [
       const c = mk(ART);
       const g = paper(c, '#fbf7ee', rnd, 0);
       for (const [step, rad] of [
-        [10, 5.5],
-        [8, 3.8],
+        [8, 4.6],
+        [6, 3.2],
       ]) {
         for (let y = 0; y < ART; y += step)
           for (let x = 0; x < ART; x += step) {
@@ -399,7 +409,7 @@ export const STYLES: Style[] = [
   },
   {
     key: 'ink',
-    name: 'Thủy mặc',
+    name: 'Thủy mặc màu',
     en: 'Ink wash',
     ink: '#1d2430',
     lineW: 3.5,
@@ -410,10 +420,10 @@ export const STYLES: Style[] = [
       const g = paper(c, '#f3ecdc', rnd, 1200);
       g.globalCompositeOperation = 'multiply';
       g.globalAlpha = 0.85;
-      g.filter = 'grayscale(1) contrast(1.5) blur(4px)';
+      g.filter = 'saturate(0.85) contrast(1.2) blur(1.5px)';
       g.drawImage(src, 0, 0, ART, ART);
-      g.filter = 'grayscale(1) contrast(2.2) blur(1px)';
-      g.globalAlpha = 0.35;
+      g.filter = 'grayscale(1) contrast(2.2)';
+      g.globalAlpha = 0.25;
       g.drawImage(src, 0, 0, ART, ART);
       g.filter = 'none';
       g.globalAlpha = 1;
@@ -490,9 +500,11 @@ export function loadSource(key: string, name: string, avatar: string): Promise<H
     const t = setTimeout(() => resolve(faceFor(name)), 3000);
     img.onload = () => {
       clearTimeout(t);
-      const c = mk(SRC);
+      const c = mk(SRC_HI);
       const s = Math.min(img.naturalWidth, img.naturalHeight);
-      ctx2(c).drawImage(img, (img.naturalWidth - s) / 2, (img.naturalHeight - s) / 2, s, s, 0, 0, SRC, SRC);
+      const g = ctx2(c);
+      g.imageSmoothingQuality = "high";
+      g.drawImage(img, (img.naturalWidth - s) / 2, (img.naturalHeight - s) / 2, s, s, 0, 0, SRC_HI, SRC_HI);
       resolve(c);
     };
     img.onerror = () => {
@@ -510,7 +522,7 @@ export function loadSource(key: string, name: string, avatar: string): Promise<H
 /** Các đường nét (toạ độ trong tranh ART), đã xếp theo thứ tự cọ đi gần nhất */
 export function traceLines(src: HTMLCanvasElement, rnd: () => number): number[][] {
   const S = SRC;
-  const d = ctx2(src).getImageData(0, 0, S, S).data;
+  const d = pixels(src, S).data; // ảnh nguồn có thể lớn hơn 96px
   const gray = new Float32Array(S * S);
   for (let i = 0; i < S * S; i++) gray[i] = lum(d, i * 4);
   const blur = new Float32Array(S * S);

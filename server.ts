@@ -175,7 +175,9 @@ app.get('/api/tiktok/status', (_req, res) => res.json({ success: true, data: liv
 // ---------- Đọc dữ liệu TikTok (proto v3) ----------
 const userOf = (data: any) => data?.user?.displayId || data?.user?.uniqueId || data?.uniqueId || 'nguoi-xem';
 const nickOf = (data: any) => data?.user?.nickname || data?.nickname || data?.uniqueId || 'Bạn';
-const avatarOf = (data: any) => data?.user?.avatarThumb?.urlList?.[0] || '';
+// Avatar cỡ lớn trước (avatarThumb chỉ ~100px, vẽ lại bị nhòe)
+const avatarOf = (data: any) =>
+  data?.user?.avatarLarge?.urlList?.[0] || data?.user?.avatarMedium?.urlList?.[0] || data?.user?.avatarThumb?.urlList?.[0] || '';
 
 app.post('/api/tiktok/connect', async (req, res) => {
   const cleanUser = String(req.body?.username || '').replace(/^@/, '').trim();

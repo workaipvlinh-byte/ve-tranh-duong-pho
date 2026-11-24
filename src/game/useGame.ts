@@ -6,7 +6,9 @@ import { containsBanned, maskBanned } from '../live/bannedWords';
 import { addScore, NameBatcher, type Players } from '../live/scoreboard';
 import { detectWish, GiftThanker, makePicker, OncePerPerson, RecentPeople, WishLimiter } from '../live/chatter';
 import { IS_STAGE } from '../live/page';
-import { EN_LINES, GAME, TEXT, type Lang } from './config';
+import { EN_LINES, GAME, TALK, TEXT, type Lang, type TalkLevel } from './config';
+import { music } from './music';
+import { sfx } from './sfx';
 import type { Job } from './Easel';
 import { STYLES, loadSource } from './portrait';
 import { PAINTERS } from './Painter';
@@ -62,6 +64,11 @@ export function useGame() {
   const [lang, setLang] = useState<Lang>('vi');
   const [painterIdx, setPainterIdx] = useState(0);
   const [bg, setBg] = useState(0);
+  // Âm thanh + mức tương tác (server nhớ trong cài đặt riêng)
+  const [sound, setSound] = useState({ rate: 1, musicOn: true, musicVol: 50, sfxOn: true, sfxVol: 60, talk: 'mid' as TalkLevel });
+  const talkRef = useRef(sound.talk);
+  talkRef.current = sound.talk;
+  const queueRef = useRef<Waiting[]>([]);
   const langRef = useRef(lang);
   langRef.current = lang;
   // Bộ câu MC + tên đọc được theo bản đang chọn
@@ -200,6 +207,25 @@ export function useGame() {
           if (Number.isInteger(pi) && pi >= 0 && pi < PAINTERS.length) setPainterIdx(pi);
           const bi = Number(p.bg);
           if (Number.isInteger(bi) && bi >= 0 && bi < BACKGROUNDS.length) setBg(bi);
+          setSound((o) => {
+            const n = { ...o };
+            const r = Number(p.rate);
+            if (r >= 0.7 && r <= 1.5) n.rate = r;
+            if (p.music === 'on' || p.music === 'off') n.musicOn = p.music === 'on';
+            const v = Number(p.musicVol);
+            if (p.musicVol !== undefined && v >= 0 && v <= 100) n.musicVol = v;
+            if (p.talk === 'low' || p.talk === 'mid' || p.talk === 'high') n.talk = p.talk;
+            if (p.sfx === 'on' || p.sfx === 'off') n.sfxOn = p.sfx === 'on';
+            const sv = Number(p.sfxVol);
+            if (p.sfxVol !== undefined && sv >= 0 && sv <= 100) n.sfxVol = sv;
+            sfx.on = n.sfxOn;
+            sfx.level = n.sfxVol / 100;
+            voice.rate = n.rate;
+            music.on = n.musicOn;
+            music.level = n.musicVol / 100;
+            talk.greeter.everyMs = TALK[n.talk].greetEveryMs;
+            return n;
+          });
         } catch {
           // sai JSON: bỏ qua
         }
@@ -237,6 +263,18 @@ export function useGame() {
         }, GAME.shareReminderEveryMs),
       );
     }
+    // Rủ vẽ khi giá vẽ trống: thưa hay dày theo mức tương tác; có người vừa ghé thì gọi tên
+    let lastInvite = Date.now();
+    timers.push(
+      setInterval(() => {
+        if (jobRef.current || queueRef.current.length) return void (lastInvite = Date.now());
+        if (Date.now() - lastInvite < TALK[talkRef.current].inviteEveryMs || voice.waiting > 0 || voice.quietForMs() < 3000) return;
+        lastInvite = Date.now();
+        const who = talk.recent.latest(1, 120_000)[0];
+        const line = who && who !== 'bạn' && Math.random() < 0.5 ? S().inviteWithName(sn(who)) : pick(S().inviteLines);
+        if (line) voice.say(line);
+      }, 1000),
+    );
     if (GAME.idleAfterMs > 0) {
       timers.push(
         setInterval(() => {
@@ -248,6 +286,9 @@ export function useGame() {
     }
     return () => timers.forEach(clearInterval);
   }, []);
+
+  useEffect(() => music.start(), []); // nhạc nền chỉ phát ở trang stage
+  queueRef.current = queue;
 
   // Giá vẽ rảnh mà có người chờ: gọi người đầu hàng lên (nghỉ 0,5 giây cho tranh cũ bay lên dây)
   useEffect(() => {
@@ -303,6 +344,7 @@ export function useGame() {
     channelName,
     voiceWho,
     lang,
+    sound,
     players,
     queue,
     job,

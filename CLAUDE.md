@@ -61,6 +61,9 @@ Cách chơi lấy ý từ một game xưởng vẽ trên TikTok mà chủ kênh 
 - 2026-11-24: Quà được ưu tiên vẽ ngay sau bức hiện tại (chủ kênh yêu cầu; khác với skill `tiktok-live-game` vốn cấm xử lý quà).
 - 2026-11-24: Mỗi bức vẽ ~3 giây, phác nét xong mới tô màu. 10 phong cách, 10 họa sĩ.
 - Trên màn hình không có chữ kêu gọi tặng quà.
+- 2026-11-24: Avatar lấy cỡ lớn (`avatarLarge`), tranh giữ nét và phong cách nào cũng có màu (Chì than đổi thành Chì màu, Thủy mặc thành Thủy mặc màu).
+- 2026-11-24: Khung "Âm thanh và MC" ở trang điều khiển: nhạc nền nhẹ tự tạo (`music.ts`, bật/tắt + âm lượng), tiếng bút vẽ (`sfx.ts`: bút chì lúc phác, bút dạ lúc tô; nguồn trong CREDITS.md), tốc độ giọng, mức MC nói chuyện (Ít/Vừa/Nhiều trong `TALK`: nhịp chào người vào + giá vẽ trống thì rủ comment). Server nhớ hết.
+- 2026-11-24: Bản Việt chỉ nói "vẽ tôi", bản Anh chỉ nói "draw me" (câu MC, chữ trên màn hình, câu rủ vẽ đều theo bản).
 - 2026-11-24: Trang điều khiển gói trong 1 khung dọc 1080×1920 (cột trái: kết nối, giọng, giả lập; cột phải: xem trước + chọn họa sĩ, nền).
 - 2026-11-24: Cổng mặc định 3101 (cổng 3000 có game khác). Link LIVE Studio: `http://lvh.me:3101/?view=stage`.
 - 2026-11-24: 2 bản, chọn ở trang điều khiển (khung "Bản game"): Tiếng Việt chỉ nhận và hiện "vẽ tôi", English chỉ nhận và hiện "draw me". Chữ trên màn hình đổi theo bản (`TEXT` trong config.ts). Bản English có MC tiếng Anh (giọng Edge en-US Guy / Jenny, câu trong `EN_LINES`), không đọc lời chúc theo comment.

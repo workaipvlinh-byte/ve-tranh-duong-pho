@@ -7,6 +7,8 @@ import { GameStage } from "./game/GameStage";
 import { PAINTERS, Painter } from "./game/Painter";
 import { BACKGROUNDS, Scene } from "./game/Scene";
 import { PAINTER, type Brush } from "./game/layout";
+import { TALK, type TalkLevel } from "./game/config";
+import type { GameState } from "./game/useGame";
 
 const setPref = (k: string, v: string) =>
   sendControl("setPrefs", JSON.stringify({ [k]: v }));
@@ -184,6 +186,7 @@ export default function App() {
                     </button>
                   ))}
                 </div>
+                <SoundSettings game={game} />
               </section>
             }
             autoLive={{
@@ -215,5 +218,48 @@ export default function App() {
         </div>
       </div>
     </ControlFrame>
+  );
+}
+
+/** Âm thanh + MC: nhạc nền, tiếng bút, tốc độ giọng, mức nói chuyện. Server nhớ, áp cho trang stage. */
+function SoundSettings({ game }: { game: GameState }) {
+  const s = game.sound;
+  const chip = (on: boolean) => `rounded-lg px-3 py-1.5 text-sm font-medium ${on ? "bg-amber-500 text-slate-950" : "bg-slate-800 hover:bg-slate-700"}`;
+  const row = "mt-3 flex flex-wrap items-center gap-2 text-sm";
+  const Vol = ({ k, onKey, on, vol, label }: { k: string; onKey: string; on: boolean; vol: number; label: string }) => (
+    <div className={row}>
+      <span className="w-24">{label}</span>
+      <button className={chip(on)} onClick={() => setPref(onKey, on ? "off" : "on")}>
+        {on ? "Bật" : "Tắt"}
+      </button>
+      <input type="range" min={0} max={100} step={5} defaultValue={vol} key={vol} onPointerUp={(e) => setPref(k, (e.target as HTMLInputElement).value)} onKeyUp={(e) => setPref(k, (e.target as HTMLInputElement).value)} className="w-40 accent-amber-500" />
+      <b className="w-10 text-right">{vol}%</b>
+    </div>
+  );
+  return (
+    <div className="mt-4 border-t border-slate-800 pt-3">
+      <h2 className="font-semibold">Âm thanh và MC</h2>
+      <Vol k="musicVol" onKey="music" on={s.musicOn} vol={s.musicVol} label="Nhạc nền" />
+      <Vol k="sfxVol" onKey="sfx" on={s.sfxOn} vol={s.sfxVol} label="Tiếng bút vẽ" />
+      <div className={row}>
+        <span className="w-24">Tốc độ giọng</span>
+        {["0.85", "1", "1.15", "1.3"].map((r) => (
+          <button key={r} className={chip(s.rate === Number(r))} onClick={() => setPref("rate", r)}>
+            {r}×
+          </button>
+        ))}
+      </div>
+      <div className={row}>
+        <span className="w-24">MC nói chuyện</span>
+        {(Object.keys(TALK) as TalkLevel[]).map((k) => (
+          <button key={k} className={chip(s.talk === k)} onClick={() => setPref("talk", k)}>
+            {TALK[k].name}
+          </button>
+        ))}
+      </div>
+      <p className="mt-2 text-xs text-slate-500">
+        Mức nói chuyện: chào người vào nhanh hay chậm, giá vẽ trống thì rủ comment {game.lang === "en" ? "“draw me”" : "“vẽ tôi”"} mỗi {TALK[s.talk].inviteEveryMs / 1000} giây. Áp dụng cả bản Việt và bản Anh.
+      </p>
+    </div>
   );
 }
