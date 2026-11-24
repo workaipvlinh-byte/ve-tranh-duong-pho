@@ -9,6 +9,7 @@ const SRC = 96; // cỡ ảnh nguồn đem dò nét
 export interface Style {
   key: string;
   name: string;
+  en: string; // tên phong cách ở bản tiếng Anh
   ink: string; // màu nét phác
   lineW: number;
   linesOnTop: boolean; // nét còn hiện trên lớp màu hay bị màu phủ
@@ -92,6 +93,7 @@ export const STYLES: Style[] = [
   {
     key: 'mosaic',
     name: 'Khảm gốm',
+    en: 'Mosaic',
     ink: '#4a3426',
     lineW: 3,
     linesOnTop: false,
@@ -120,6 +122,7 @@ export const STYLES: Style[] = [
   {
     key: 'pixel',
     name: 'Điểm ảnh',
+    en: 'Pixel art',
     ink: '#222',
     lineW: 3,
     linesOnTop: false,
@@ -140,6 +143,7 @@ export const STYLES: Style[] = [
   {
     key: 'watercolor',
     name: 'Màu nước',
+    en: 'Watercolor',
     ink: '#5b4b3f',
     lineW: 2,
     linesOnTop: true,
@@ -169,6 +173,7 @@ export const STYLES: Style[] = [
   {
     key: 'pop',
     name: 'Pop art',
+    en: 'Pop art',
     ink: '#111',
     lineW: 4,
     linesOnTop: true,
@@ -196,6 +201,7 @@ export const STYLES: Style[] = [
   {
     key: 'sketch',
     name: 'Chì than',
+    en: 'Charcoal',
     ink: '#2b2b2b',
     lineW: 2.5,
     linesOnTop: true,
@@ -234,6 +240,7 @@ export const STYLES: Style[] = [
   {
     key: 'oil',
     name: 'Sơn dầu',
+    en: 'Oil paint',
     ink: '#3a2a1e',
     lineW: 3,
     linesOnTop: false,
@@ -272,6 +279,7 @@ export const STYLES: Style[] = [
   {
     key: 'glass',
     name: 'Kính màu',
+    en: 'Stained glass',
     ink: '#1c1c1c',
     lineW: 3,
     linesOnTop: true,
@@ -327,6 +335,7 @@ export const STYLES: Style[] = [
   {
     key: 'dots',
     name: 'Chấm điểm',
+    en: 'Pointillism',
     ink: '#4d4d6b',
     lineW: 2,
     linesOnTop: false,
@@ -357,6 +366,7 @@ export const STYLES: Style[] = [
   {
     key: 'comic',
     name: 'Truyện tranh',
+    en: 'Comic',
     ink: '#000',
     lineW: 5,
     linesOnTop: true,
@@ -390,6 +400,7 @@ export const STYLES: Style[] = [
   {
     key: 'ink',
     name: 'Thủy mặc',
+    en: 'Ink wash',
     ink: '#1d2430',
     lineW: 3.5,
     linesOnTop: true,

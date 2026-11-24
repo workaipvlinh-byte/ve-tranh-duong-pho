@@ -23,7 +23,7 @@ dotenv.config();
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
-const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
+const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3101; // game này mặc định cổng 3101 (3000 có game khác)
 
 // Giọng đọc. MC chính (câu không ghi gì hoặc "M:") là giọng nam; câu "F:" là MC nữ HoaiMy.
 // Đổi cao độ không cần sửa code: đặt biến môi trường TTS_PITCH (vd "+6%", "-4%") trong .env hoặc BAT-LIVE.bat
@@ -495,11 +495,19 @@ app.get('/api/avatar', async (req, res) => {
   if (url.protocol !== 'https:' || !AVATAR_HOSTS.test(url.hostname)) return res.status(400).end();
   try {
     const r = await fetch(url, { redirect: 'error', signal: AbortSignal.timeout(8000) });
-    const type = r.headers.get('content-type') || '';
-    if (!r.ok || !type.startsWith('image/')) return res.status(502).end();
+    // chỉ ảnh thường (không nhận SVG/HTML: trả cùng nguồn với trang thì có thể chạy script)
+    const type = (r.headers.get('content-type') || '').split(';')[0].trim().toLowerCase();
+    if (!r.ok || !['image/jpeg', 'image/png', 'image/webp', 'image/gif'].includes(type)) return res.status(502).end();
     const buf = Buffer.from(await r.arrayBuffer());
     if (buf.length > 2_000_000) return res.status(502).end();
-    res.set({ 'Content-Type': type, 'Cache-Control': 'private, max-age=3600' }).send(buf);
+    res
+      .set({
+        'Content-Type': type,
+        'Cache-Control': 'private, max-age=3600',
+        'X-Content-Type-Options': 'nosniff',
+        'Content-Security-Policy': "default-src 'none'; sandbox",
+      })
+      .send(buf);
   } catch {
     res.status(502).end();
   }

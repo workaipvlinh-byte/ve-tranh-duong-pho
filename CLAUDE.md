@@ -10,7 +10,7 @@ Cách chơi lấy ý từ một game xưởng vẽ trên TikTok mà chủ kênh 
 
 ## Luật chơi
 
-- Xin vẽ: comment `vẽ tôi`, `draw me`, `vẽ mình`, `vẽ cho tôi` (so sánh không dấu). Đang chờ hoặc đang được vẽ thì comment lại không tính thêm.
+- Xin vẽ: bản Việt comment `vẽ tôi` (cả `vẽ mình`, `vẽ cho tôi`), bản Anh comment `draw me` (so sánh không dấu). Đang chờ hoặc đang được vẽ thì comment lại không tính thêm.
 - Hàng chờ: tối đa 300 người, khu chờ hiện 32 người đầu (zíc zắc, người đầu ở góc sát họa sĩ), còn lại hiện "+N người đang chờ".
 - Quà: người tặng được vẽ ngay sau bức đang vẽ, xếp sau những người tặng trước đó. Có viền vàng, sao, khung tranh vàng trên dây. MC cảm ơn và báo "được vẽ ngay sau bức này".
 - Tim: đủ 500 tim thì đèn lồng sáng rực 30 giây.
@@ -60,3 +60,5 @@ Cách chơi lấy ý từ một game xưởng vẽ trên TikTok mà chủ kênh 
 - 2026-11-24: Quà được ưu tiên vẽ ngay sau bức hiện tại (chủ kênh yêu cầu; khác với skill `tiktok-live-game` vốn cấm xử lý quà).
 - 2026-11-24: Mỗi bức vẽ ~3 giây, phác nét xong mới tô màu. 10 phong cách, 10 họa sĩ.
 - Trên màn hình không có chữ kêu gọi tặng quà.
+- 2026-11-24: Cổng mặc định 3101 (cổng 3000 có game khác). Link LIVE Studio: `http://lvh.me:3101/?view=stage`.
+- 2026-11-24: 2 bản, chọn ở trang điều khiển (khung "Bản game"): Tiếng Việt chỉ nhận và hiện "vẽ tôi", English chỉ nhận và hiện "draw me". Chữ trên màn hình đổi theo bản (`TEXT` trong config.ts). Giọng MC vẫn tiếng Việt.

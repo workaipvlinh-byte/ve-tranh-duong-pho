@@ -6,7 +6,7 @@ import { containsBanned, maskBanned } from '../live/bannedWords';
 import { addScore, NameBatcher, type Players } from '../live/scoreboard';
 import { detectWish, GiftThanker, makePicker, OncePerPerson, RecentPeople, WishLimiter } from '../live/chatter';
 import { IS_STAGE } from '../live/page';
-import { GAME } from './config';
+import { GAME, TEXT, type Lang } from './config';
 import type { Job } from './Easel';
 import { STYLES, loadSource } from './portrait';
 import { PAINTERS } from './Painter';
@@ -58,6 +58,9 @@ export function useGame() {
   const jobRef = useRef(job);
   jobRef.current = job;
   const lastStyle = useRef(-1);
+  const [lang, setLang] = useState<Lang>('vi');
+  const langRef = useRef(lang);
+  langRef.current = lang;
   const [feed, setFeed] = useState<FeedItem[]>([]);
   const [lastGift, setLastGift] = useState<GiftEvent | null>(null);
   const [likeProgress, setLikeProgress] = useState(0); // 0..likesPerBoost
@@ -105,7 +108,7 @@ export function useGame() {
       if (reply && talk.wishes.allow(e.username)) voice.say(reply(speakableName(name)));
 
       // --- Luật chơi: comment "vẽ tôi" / "draw me" thì vào cuối hàng (đang chờ hoặc đang được vẽ thì thôi) ---
-      if (GAME.joinKeywords.some((k) => compact(e.comment).includes(k))) {
+      if (TEXT[langRef.current].keywords.some((k) => compact(e.comment).includes(k))) {
         if (jobRef.current?.username === e.username) return;
         setQueue((q) =>
           q.length >= GAME.maxQueue || q.some((w) => w.username === e.username)
@@ -173,6 +176,15 @@ export function useGame() {
       if (c.action === 'setVoice' && (c.text === 'M' || c.text === 'F')) {
         voice.defaultWho = c.text;
         setVoiceWho(c.text);
+      }
+      // Bản tiếng Việt / tiếng Anh: server nhớ trong cài đặt riêng (setPrefs), gửi lại cho trang mới mở
+      if (c.action === 'setPrefs' && c.text) {
+        try {
+          const l = JSON.parse(c.text).lang;
+          if (l === 'vi' || l === 'en') setLang(l);
+        } catch {
+          // sai JSON: bỏ qua
+        }
       }
       if (!IS_STAGE) return; // chỉ trang stage làm theo lệnh, tránh 2 giọng
       if (c.action === 'speak' && c.text) voice.say(c.text, true);
@@ -273,6 +285,7 @@ export function useGame() {
     status,
     channelName,
     voiceWho,
+    lang,
     players,
     queue,
     job,

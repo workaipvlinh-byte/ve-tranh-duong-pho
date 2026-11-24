@@ -6,6 +6,41 @@
 
 import type { WishTopic } from '../live/chatter';
 
+// ---------- 2 bản: tiếng Việt / tiếng Anh (chọn ở trang điều khiển) ----------
+// Chữ trên màn hình + từ khóa xin vẽ đổi theo bản. Giọng MC vẫn đọc câu tiếng Việt bên dưới.
+export type Lang = 'vi' | 'en';
+export const TEXT = {
+  vi: {
+    title: 'XƯỞNG VẼ PHỐ HỘI',
+    keyword: 'vẽ tôi',
+    // so sánh không dấu, không hoa thường, bỏ khoảng trắng
+    keywords: ['vetoi', 'veminh', 'vechotoi'],
+    queue: 'Hàng chờ',
+    next: 'Kế tiếp',
+    more: (n: number) => `+${n} người đang chờ`,
+    style: 'Phong cách',
+    painter: 'Họa sĩ',
+    likes: 'Thả tim cho phố lên đèn',
+    hangHere: 'Tranh của bạn treo ở đây',
+    idle: 'để được vẽ chân dung',
+    show: ['Đẹp chưa nè!', 'Xong rồi nha!', 'Ưng không bạn?', 'Tuyệt tác!', 'Treo lên thôi!', 'Hết sẩy!', 'Giống y chang!'],
+  },
+  en: {
+    title: 'HOI AN PORTRAIT STUDIO',
+    keyword: 'draw me',
+    keywords: ['drawme'],
+    queue: 'Queue',
+    next: 'Next',
+    more: (n: number) => `+${n} more waiting`,
+    style: 'Style',
+    painter: 'Painter',
+    likes: 'Tap likes to light up the town',
+    hangHere: 'Your portrait hangs here',
+    idle: 'to get your portrait',
+    show: ['Ta-da!', 'All done!', 'Like it?', 'Masterpiece!', 'Up it goes!', 'Looking good!', 'Spot on!'],
+  },
+};
+
 export const GAME = {
   title: 'XƯỞNG VẼ PHỐ HỘI',
   subtitle: 'Comment “vẽ tôi” để được vẽ chân dung',
@@ -16,8 +51,6 @@ export const GAME = {
   // Giọng MC mặc định khi chưa chọn ở trang điều khiển: 'M' = nam NamMinh, 'F' = nữ HoaiMy
   voice: 'M' as 'M' | 'F',
 
-  // Từ khóa trong comment để xin vẽ (so sánh không dấu, không hoa thường, bỏ khoảng trắng)
-  joinKeywords: ['vetoi', 'drawme', 'veminh', 'vechotoi'],
   maxQueue: 300, // hàng chờ tối đa (khu chờ chỉ hiện 32 người đầu, còn lại hiện "+N")
   paintersEvery: 5, // vẽ xong 5 bức thì đổi họa sĩ
   galleryMax: 6, // số tranh treo trên dây

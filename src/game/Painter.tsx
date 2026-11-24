@@ -34,7 +34,6 @@ export const PAINTERS: PainterDef[] = [
   { name: 'Anh Bảo', skin: '#eec19f', hair: '#2b1d16', hairStyle: 'bob', hat: 'beret', hatColor: '#3d405b', shirt: '#606c38', pants: '#283618', apron: '#f4a261', mustache: true },
 ];
 
-const SHOW_LINES = ['Đẹp chưa nè!', 'Xong rồi nha!', 'Ưng không bạn?', 'Tuyệt tác!', 'Treo lên thôi!', 'Hết sẩy!', 'Giống y chang!'];
 
 const INK = '#2a1d17';
 const SW = 6; // viền mực
@@ -143,7 +142,9 @@ function HatShape({ p }: { p: PainterDef }) {
 }
 
 /** 1 họa sĩ. Mọi chuyển động chạy bằng requestAnimationFrame, đổi thẳng thuộc tính SVG (không render lại React). */
-export function Painter({ p, brush }: { p: PainterDef; brush: Brush }) {
+export function Painter({ p, brush, lines, label }: { p: PainterDef; brush: Brush; lines: string[]; label: string }) {
+  const say = useRef(lines);
+  say.current = lines;
   const root = useRef<SVGGElement>(null);
   const head = useRef<SVGGElement>(null);
   const upper = useRef<SVGPathElement>(null);
@@ -249,7 +250,7 @@ export function Painter({ p, brush }: { p: PainterDef; brush: Brush }) {
         mouthOpen.current?.setAttribute('visibility', show ? 'visible' : 'hidden');
         mouthSmile.current?.setAttribute('visibility', show ? 'hidden' : 'visible');
         if (bubble.current) {
-          if (show) bubble.current.textContent = SHOW_LINES[Math.floor(Math.random() * SHOW_LINES.length)];
+          if (show) bubble.current.textContent = say.current[Math.floor(Math.random() * say.current.length)];
           bubble.current.style.opacity = show ? '1' : '0';
           bubble.current.style.transform = show ? 'scale(1)' : 'scale(0.6)';
         }
@@ -364,7 +365,7 @@ export function Painter({ p, brush }: { p: PainterDef; brush: Brush }) {
         style={{ opacity: 0, transform: 'scale(0.6)', transformOrigin: 'bottom left', transition: 'opacity 180ms ease-out, transform 260ms cubic-bezier(.34,1.56,.64,1)' }}
       />
       <div className="absolute left-[60px] top-[690px] rounded-full bg-[#2a1d17]/80 px-5 py-1 text-[28px] font-semibold text-amber-100">
-        Họa sĩ {p.name}
+        {label} {p.name}
       </div>
     </div>
   );

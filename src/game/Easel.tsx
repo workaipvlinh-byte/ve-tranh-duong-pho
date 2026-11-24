@@ -8,6 +8,7 @@ import {
   traceLines,
 } from "./portrait";
 import { CANVAS, TIMES, type Brush } from "./layout";
+import { TEXT, type Lang } from "./config";
 
 export interface Job {
   id: number;
@@ -30,10 +31,12 @@ const mk = () => {
 export function Easel({
   job,
   brush,
+  lang,
   onDone,
 }: {
   job: Job | null;
   brush: Brush;
+  lang: Lang;
   onDone: (id: number, img: string) => void;
 }) {
   const ref = useRef<HTMLCanvasElement>(null);
@@ -51,9 +54,9 @@ export function Easel({
         view.fillStyle = "#b8a58c";
         view.font = '600 38px "Be Vietnam Pro", sans-serif';
         view.textAlign = "center";
-        view.fillText("Comment “vẽ tôi”", ART / 2, ART / 2 - 10);
+        view.fillText(`Comment “${TEXT[lang].keyword}”`, ART / 2, ART / 2 - 10);
         view.font = '32px "Be Vietnam Pro", sans-serif';
-        view.fillText("để được vẽ chân dung", ART / 2, ART / 2 + 40);
+        view.fillText(TEXT[lang].idle, ART / 2, ART / 2 + 40);
       }, 900);
       return () => clearTimeout(t);
     }
@@ -178,7 +181,7 @@ export function Easel({
       stop = true;
       cancelAnimationFrame(raf);
     };
-  }, [job?.id]);
+  }, [job?.id, job ? '' : lang]);
 
   return (
     <canvas

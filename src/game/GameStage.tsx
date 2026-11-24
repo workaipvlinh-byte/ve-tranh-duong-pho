@@ -1,7 +1,7 @@
 import { useRef } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import type { GameState, Waiting } from './useGame';
-import { GAME } from './config';
+import { GAME, TEXT } from './config';
 import { Scene } from './Scene';
 import { Easel } from './Easel';
 import { Painter } from './Painter';
@@ -23,6 +23,7 @@ export function GameStage({ game }: { game: GameState }) {
   const brush = useRef<Brush>({ x: 0, y: 0, mode: 'idle', color: '#3b2a20' }).current;
   const likePct = Math.min(100, (game.likeProgress / GAME.likesPerBoost) * 100);
   const job = game.job;
+  const T = TEXT[game.lang];
 
   return (
     <div className={`relative h-full w-full overflow-hidden ${game.boosting ? 'stage-boost' : ''}`}>
@@ -33,7 +34,7 @@ export function GameStage({ game }: { game: GameState }) {
         className="absolute left-1/2 top-[146px] -translate-x-1/2 rounded-[22px] border-[6px] px-12 py-3 text-center shadow-xl"
         style={{ background: '#7a4b2a', borderColor: INK }}
       >
-        <div className="whitespace-nowrap text-[60px] font-extrabold leading-none tracking-wide text-[#ffe8a3]">{GAME.title}</div>
+        <div className="whitespace-nowrap text-[60px] font-extrabold leading-none tracking-wide text-[#ffe8a3]">{T.title}</div>
       </div>
 
       {/* Dây treo tranh vừa vẽ xong */}
@@ -47,7 +48,7 @@ export function GameStage({ game }: { game: GameState }) {
             className="absolute flex items-center justify-center rounded-lg border-4 border-dashed border-[#7a4b2a]/60 bg-white/40 text-center text-[24px] font-semibold text-[#7a4b2a]"
             style={{ left: slotX(i + 1), top: stringY(slotX(i + 1) + FRAME_W / 2) + 14, width: FRAME_W, height: FRAME_W }}
           >
-            Tranh của bạn treo ở đây
+            {T.hangHere}
           </div>
         ))}
       <AnimatePresence>
@@ -83,10 +84,10 @@ export function GameStage({ game }: { game: GameState }) {
       </AnimatePresence>
 
       {/* Khu xếp hàng */}
-      <Queue queue={game.queue} />
+      <Queue queue={game.queue} T={T} />
 
       {/* Giá vẽ + họa sĩ */}
-      <Easel job={job} brush={brush} onDone={game.finish} />
+      <Easel job={job} brush={brush} lang={game.lang} onDone={game.finish} />
       <AnimatePresence>
         <motion.div
           key={game.painter.name}
@@ -96,7 +97,7 @@ export function GameStage({ game }: { game: GameState }) {
           exit={{ x: -620 }}
           transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
         >
-          <Painter p={game.painter} brush={brush} />
+          <Painter p={game.painter} brush={brush} lines={T.show} label={T.painter} />
         </motion.div>
       </AnimatePresence>
 
@@ -120,7 +121,7 @@ export function GameStage({ game }: { game: GameState }) {
               {job.name}
             </div>
             <div className="mt-2 rounded-full bg-[#2a1d17]/80 px-5 py-1 text-[28px] font-semibold text-amber-100">
-              Phong cách: {STYLES[job.style].name}
+              {T.style}: {game.lang === 'en' ? STYLES[job.style].en : STYLES[job.style].name}
             </div>
           </motion.div>
         )}
@@ -128,11 +129,11 @@ export function GameStage({ game }: { game: GameState }) {
 
       {/* Gợi ý + thanh tim */}
       <div className="absolute left-1/2 top-[1520px] -translate-x-1/2 whitespace-nowrap rounded-full border-[5px] bg-[#fff7e6] px-9 py-3 text-[38px] font-bold text-[#2a1d17] shadow-lg" style={{ borderColor: INK }}>
-        💬 Comment <span className="text-[#c0392b]">“vẽ tôi”</span> hoặc <span className="text-[#c0392b]">“draw me”</span>
+        💬 Comment <span className="text-[#c0392b]">“{T.keyword}”</span>
       </div>
       <div className="absolute left-[60px] right-[160px] top-[1610px]">
         <div className="mb-1 flex justify-between text-[28px] font-bold text-white drop-shadow">
-          <span>❤️ Thả tim cho phố lên đèn</span>
+          <span>❤️ {T.likes}</span>
           <span>
             {game.likeProgress}/{GAME.likesPerBoost}
           </span>
@@ -154,14 +155,14 @@ const slotPos = (i: number) => {
   return { x: QUEUE.x + c * QUEUE.gap, y: QUEUE.y + r * QUEUE.gap };
 };
 
-function Queue({ queue }: { queue: Waiting[] }) {
+function Queue({ queue, T }: { queue: Waiting[]; T: (typeof TEXT)['vi'] }) {
   const shown = queue.slice(0, SLOTS);
   const more = queue.length - shown.length;
   const W = QUEUE.cols * QUEUE.gap;
   return (
     <>
       <div className="absolute rounded-full border-[4px] bg-[#fff7e6] px-5 py-1 text-[30px] font-extrabold text-[#2a1d17]" style={{ left: QUEUE.x, top: QUEUE.y - 66, borderColor: INK }}>
-        Hàng chờ · {queue.length}
+        {T.queue} · {queue.length}
       </div>
       {/* cột + dây nhung */}
       <svg className="absolute left-0 top-0" width={1080} height={1920}>
@@ -195,14 +196,14 @@ function Queue({ queue }: { queue: Waiting[] }) {
               exit={{ x: 380, y: QUEUE.y + 120, scale: 0.4, opacity: 0, transition: { duration: 0.45, ease: 'easeIn' } }}
               transition={{ type: 'spring', stiffness: 260, damping: 24 }}
             >
-              <Person w={w} first={i === 0} />
+              <Person w={w} first={i === 0} next={T.next} />
             </motion.div>
           );
         })}
       </AnimatePresence>
       {more > 0 && (
         <div className="absolute rounded-full bg-[#2a1d17]/85 px-4 py-1 text-[28px] font-bold text-white" style={{ left: QUEUE.x + 40, top: QUEUE.y + QUEUE.rows * QUEUE.gap + 4 }}>
-          +{more} người đang chờ
+          {T.more(more)}
         </div>
       )}
     </>
@@ -210,7 +211,7 @@ function Queue({ queue }: { queue: Waiting[] }) {
 }
 
 const DOT = ['#e76f51', '#2a9d8f', '#e9c46a', '#8ab17d', '#9b5de5', '#f15bb5', '#00bbf9'];
-function Person({ w, first }: { w: Waiting; first: boolean }) {
+function Person({ w, first, next }: { w: Waiting; first: boolean; next: string }) {
   const color = DOT[[...w.username].reduce((s, c) => s + c.charCodeAt(0), 0) % DOT.length];
   return (
     <div className="relative h-[64px] w-[64px] bob" style={{ animationDelay: `${-(w.username.length % 7) * 0.3}s` }}>
@@ -225,7 +226,7 @@ function Person({ w, first }: { w: Waiting; first: boolean }) {
         )}
       </div>
       {w.vip && <div className="absolute -right-2 -top-3 text-[28px]">⭐</div>}
-      {first && <div className="absolute -top-9 left-1/2 -translate-x-1/2 whitespace-nowrap rounded bg-[#c0392b] px-2 text-[20px] font-bold text-white">Kế tiếp</div>}
+      {first && <div className="absolute -top-9 left-1/2 -translate-x-1/2 whitespace-nowrap rounded bg-[#c0392b] px-2 text-[20px] font-bold text-white">{next}</div>}
     </div>
   );
 }
