@@ -233,6 +233,8 @@ export function useGame() {
         }
       }
       if (!IS_STAGE) return; // chỉ trang stage làm theo lệnh, tránh 2 giọng
+      // nút "Tải lại trang live": trang trong LIVE Studio lấy code mới mà không phải vào LIVE Studio bấm
+      if (c.action === 'custom' && c.text === 'reload') return void window.location.reload();
       if (c.action === 'speak' && c.text) voice.say(c.text, true);
       if (c.action === 'setRate' && c.text) voice.rate = Number(c.text) || 1;
       if (c.action === 'reset') {

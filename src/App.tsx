@@ -238,6 +238,12 @@ function SoundSettings({ game }: { game: GameState }) {
   );
   return (
     <div className="mt-4 border-t border-slate-800 pt-3">
+      <div className="mb-3 flex items-center gap-2 text-sm">
+        <button className="rounded-lg bg-sky-600 px-3 py-1.5 font-medium hover:bg-sky-500" onClick={() => sendControl("custom", "reload")}>
+          ⟳ Tải lại trang live
+        </button>
+        <span className="text-xs text-slate-400">Sau khi sửa code / bật lại BAT-LIVE. Hàng chờ và tranh trên dây sẽ trống lại.</span>
+      </div>
       <h2 className="font-semibold">Âm thanh và MC</h2>
       <Vol k="musicVol" onKey="music" on={s.musicOn} vol={s.musicVol} label="Nhạc nền" />
       <Vol k="sfxVol" onKey="sfx" on={s.sfxOn} vol={s.sfxVol} label="Tiếng bút vẽ" />
