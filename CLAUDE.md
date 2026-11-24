@@ -1,11 +1,11 @@
-# Xưởng Vẽ Phố Hội: ghi chú cho Claude
+# Vẽ Tranh Đường Phố: ghi chú cho Claude
 
 > File này mô tả RIÊNG game này. Luật chung cho mọi game nằm ở `E:\VibeCode\CLAUDE.md` (Claude tự đọc cả hai).
 > Khi chủ kênh chốt một quyết định (câu đọc, màu, font, luật chơi), ghi vào mục "Quyết định của chủ kênh".
 
 ## Ý tưởng
 
-Một xưởng vẽ chân dung giữa phố cổ Hội An. Người xem comment "vẽ tôi" thì avatar vào hàng chờ, họa sĩ vẽ lại avatar thành tranh (phác nét trước, tô màu sau, khoảng 3 giây một bức), xong thì treo lên dây phía trên.
+Họa sĩ đường phố vẽ chân dung cho người xem (10 nền: phố Hội, bãi biển, phố tuyết, phố neon...). Người xem comment "vẽ tôi" thì avatar vào hàng chờ, họa sĩ vẽ lại avatar thành tranh (phác nét trước, tô màu sau, khoảng 3 giây một bức), xong thì treo lên dây phía trên.
 Cách chơi lấy ý từ một game xưởng vẽ trên TikTok mà chủ kênh gửi ảnh, nhưng bối cảnh, nhân vật, tên game đều tự làm, không chép lại game đó.
 
 ## Luật chơi

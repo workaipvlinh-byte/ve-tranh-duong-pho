@@ -11,7 +11,7 @@ import type { WishTopic } from '../live/chatter';
 export type Lang = 'vi' | 'en';
 export const TEXT = {
   vi: {
-    title: 'XƯỞNG VẼ PHỐ HỘI',
+    title: 'VẼ TRANH ĐƯỜNG PHỐ',
     keyword: 'vẽ tôi',
     // so sánh không dấu, không hoa thường, bỏ khoảng trắng
     keywords: ['vetoi', 'veminh', 'vechotoi'],
@@ -26,7 +26,7 @@ export const TEXT = {
     show: ['Đẹp chưa nè!', 'Xong rồi nha!', 'Ưng không bạn?', 'Tuyệt tác!', 'Treo lên thôi!', 'Hết sẩy!', 'Giống y chang!'],
   },
   en: {
-    title: 'HOI AN PORTRAIT STUDIO',
+    title: 'STREET PORTRAITS',
     keyword: 'draw me',
     keywords: ['drawme'],
     queue: 'Queue',
@@ -60,7 +60,7 @@ export const EN_LINES = {
 };
 
 export const GAME = {
-  title: 'XƯỞNG VẼ PHỐ HỘI',
+  title: 'VẼ TRANH ĐƯỜNG PHỐ',
   subtitle: 'Comment “vẽ tôi” để được vẽ chân dung',
 
   // Tên kênh mặc định, tới khi chủ kênh lưu tên ở trang điều khiển

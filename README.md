@@ -1,4 +1,4 @@
-# Xưởng Vẽ Phố Hội
+# Vẽ Tranh Đường Phố
 
 Game tương tác cho TikTok LIVE: người xem comment "vẽ tôi" thì họa sĩ vẽ chân dung từ avatar, vẽ xong treo lên dây.
 
